@@ -5,7 +5,8 @@ public class day1 {
     public static void main(String[] args) {
         List<Integer> listOne = new ArrayList<>();
         List<Integer> listTwo = new ArrayList<>();
-        int sum = 0;
+        int distanceSum = 0;
+        long similaritySum = 0L;
 
         try {
             File myObj = new File("src/data/data01.txt");
@@ -25,11 +26,23 @@ public class day1 {
         Collections.sort(listTwo);
 
         for (int i = 0; i < listOne.size(); i++) {
-            sum += Math.abs(listOne.get(i) - listTwo.get(i));
+            distanceSum += Math.abs(listOne.get(i) - listTwo.get(i));
         }
       
-        System.out.println("Part 1: " + sum);
+        System.out.println("Part 1: " + distanceSum);
 
-        // End Part 1
+        // Start Part 2
+
+        int[] count = new int[99999];
+
+        for (int j = 0; j < listTwo.size(); j++) {
+            count[listTwo.get(j)]++;
+        }
+
+        for (int k = 0; k < listOne.size(); k++) {
+                similaritySum += listOne.get(k) * count[listOne.get(k)];
+        }
+
+        System.out.println("Part 2: " + similaritySum);
     }
 }
