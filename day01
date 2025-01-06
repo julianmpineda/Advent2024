@@ -1,0 +1,35 @@
+import java.io.*;
+import java.util.*;
+
+public class day1 {
+    public static void main(String[] args) {
+        List<Integer> listOne = new ArrayList<>();
+        List<Integer> listTwo = new ArrayList<>();
+        int sum = 0;
+
+        try {
+            File myObj = new File("src/data/data01.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                String[] line = myReader.nextLine().split("   ");
+                listOne.add(Integer.parseInt(line[0]));
+                listTwo.add(Integer.parseInt(line[1]));
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        // Start Part 1
+        Collections.sort(listOne);
+        Collections.sort(listTwo);
+
+        for (int i = 0; i < listOne.size(); i++) {
+            sum += Math.abs(listOne.get(i) - listTwo.get(i));
+        }
+      
+        System.out.println("Part 1: " + sum);
+
+        // End Part 1
+    }
+}
