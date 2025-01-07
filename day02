@@ -1,0 +1,50 @@
+import java.io.*;
+import java.util.*;
+
+public class day02 {
+    public static void main(String[] args) {
+
+        int sumOne = 0;
+        int sumTwo = 0;
+        List<String> lines = new ArrayList<>();
+
+        try {
+            File myObj = new File("src/data/data02.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                lines.add(myReader.nextLine());
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+            for (int i = 0; i < lines.size(); i++) {
+                String[] report = lines.get(i).split(" ");
+                int[] levels = new int[report.length];
+
+                for (int j = 0; j < report.length; j++) {
+                    levels[j] = Integer.parseInt(report[j]);
+                }
+
+                int dir = (levels[1] > levels[0]) ? -1 : 1;
+
+                for (int k = 1; k < levels.length; k++) {
+
+                    int diff = (levels[k-1] - levels[k]) * dir;
+
+                    if (!(diff > 0 && diff < 4)) {
+                        break;
+                    }
+
+                    if (i == levels.length - 1) {
+                        sumOne++;
+                        sumTwo++;
+                    }
+                }
+
+            }
+
+
+        System.out.println("Part 1: " + sumOne);
+    }
+}
