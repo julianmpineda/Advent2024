@@ -18,33 +18,66 @@ public class day02 {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-            for (int i = 0; i < lines.size(); i++) {
-                String[] report = lines.get(i).split(" ");
-                int[] levels = new int[report.length];
 
-                for (int j = 0; j < report.length; j++) {
-                    levels[j] = Integer.parseInt(report[j]);
-                }
+        for (int i = 0; i < lines.size(); i++) {
+            String[] report = lines.get(i).split(" ");
+            int[] levels = new int[report.length];
 
-                int dir = (levels[1] > levels[0]) ? -1 : 1;
-
-                for (int k = 1; k < levels.length; k++) {
-
-                    int diff = (levels[k-1] - levels[k]) * dir;
-
-                    if (!(diff > 0 && diff < 4)) {
-                        break;
-                    }
-
-                    if (i == levels.length - 1) {
-                        sumOne++;
-                        sumTwo++;
-                    }
-                }
-
+            for (int j = 0; j < report.length; j++) {
+                levels[j] = Integer.parseInt(report[j]);
             }
 
+            int check = checkReport(levels);
+
+            if (check == 1) {
+                sumOne++;
+                sumTwo++;
+            } else {
+                sumTwo += dampener(levels);
+            }
+        }
 
         System.out.println("Part 1: " + sumOne);
+        System.out.println("Part 1: " + sumTwo);
+    }
+
+    private static int checkReport(int[] levels) {
+
+        int dir = (levels[1] > levels[0]) ? -1 : 1;
+
+        for (int i = 1; i < levels.length; i++) {
+            int diff = (levels[i - 1] - levels[i]) * dir;
+
+            if (!(diff > 0 && diff < 4)) {
+                break;
+            }
+
+            if (i == levels.length - 1) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+
+    private static int dampener(int[] levels) {
+
+        for (int i = 0; i < levels.length; i++) {
+            int[] dampened = new int[levels.length - 1];
+            int offset = 0;
+
+            for (int j = 0; j < levels.length - 1; j++) {
+                if (j == i) {
+                    offset = 1;
+                }
+                dampened[j] = levels[j + offset];
+            }
+
+            int check = checkReport(dampened);
+
+            if (check == 1) {
+                return 1;
+            }
+        }
+        return 0;
     }
 }
