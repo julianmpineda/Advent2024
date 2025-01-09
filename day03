@@ -1,0 +1,59 @@
+import java.io.*;
+import java.util.*;
+
+public class day03 {
+    public static void main(String[] args) {
+
+        List<Integer> numbers = new ArrayList<>();
+        String line = "";
+        int count = 0;
+        long sumOne = 0L;
+
+        try {
+            File myObj = new File("src/data/data03.txt");
+            Scanner myReader = new Scanner(myObj);
+            line = myReader.nextLine();
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        while (count < line.length() - 4) {
+
+            if (line.substring(count, count + 4).equals("mul(")) {
+                StringBuilder num = new StringBuilder();
+                count += 4;
+                boolean comma = false;
+
+                while (line.charAt(count - 1) != ')') {
+                    char curr = line.charAt(count);
+                    if (Character.isDigit(curr)) {
+                        num.append(curr);
+                        count++;
+                    } else if (curr == ',' && !comma) {
+                        comma = true;
+                        numbers.add(Integer.parseInt(num.toString()));
+                        num.setLength(0);
+                        count++;
+                    } else if (curr == ')') {
+                        numbers.add(Integer.parseInt(num.toString()));
+                        count++;
+                    } else {
+                        if (comma) {
+                            numbers.remove(numbers.size() - 1);
+                        }
+                        break;
+                    }
+                }
+            } else {
+                count++;
+            }
+        }
+
+        for (int i = 0; i < numbers.size() - 1; i += 2) {
+            sumOne += numbers.get(i) * numbers.get(i + 1);
+        }
+
+        System.out.println("Part 1: " + sumOne);
+    }
+}
