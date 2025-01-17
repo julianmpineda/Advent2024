@@ -3,14 +3,12 @@ import java.util.*;
 
 public class day04 {
 
-    // {{ up right }, {down right}, {down left}, {up left}
-    private static int[][] dir = {{-1, 1}, {1, 1}, {-1, 1}, {-1, -1}};
     private static char[][] wordSearch;
 
     public static void main(String[] args) {
 
         List<String> lines = new ArrayList<>();
-        int sumOne = 0;
+        int sumOne = 0, sumTwo = 0;
 
         try {
             File myObj = new File("src/data/data04.txt");
@@ -27,12 +25,22 @@ public class day04 {
         wordSearch = new char[lines.get(0).length()][lines.size()];
 
         for (int i = 0; i < lines.size(); i++) {
-            sumOne += leftRight(lines.get(i));
-            wordSearch[i] = lines.get(i).toCharArray();
+            String s = lines.get(i);
+
+            for (int j = 0; j < s.length() - 3; j++) {
+                if (s.charAt(j) == 'X' || s.charAt(j) == 'S') {
+                    String sub = s.substring(j, j + 4);
+
+                    if (sub.toString().equals("XMAS") || sub.toString().equals("SAMX")) {
+                        sumOne++;
+                    }
+                }
+            }
+
+            wordSearch[i] = s.toCharArray();
         }
 
         for (int i = 0; i < row - 3; i++) {
-
             for (int j = 0; j < col; j++) {
                 if (wordSearch[i][j] =='X' || wordSearch[i][j] =='S'){
                     StringBuilder sub = new StringBuilder();
@@ -77,40 +85,24 @@ public class day04 {
         }
 
         System.out.println("Part 1: " + sumOne);
-    }
 
-    private static int leftRight(String s) {
+        for (int i = 1; i < row - 1; i++) {
+            for (int j = 1; j < col - 1; j++) {
 
-        int count = 0;
+                if (wordSearch[i][j] == 'A') {
 
-        for (int i = 0; i < s.length() - 3; i++) {
-            if (s.charAt(i) == 'X' || s.charAt(i) == 'S') {
+                    char uL = wordSearch[i - 1][j - 1], uR = wordSearch[i - 1][j + 1],
+                            dL = wordSearch[i + 1][j - 1], dR = wordSearch[i + 1][j + 1];
 
-                String sub = s.substring(i, i + 4);
-
-                if (sub.toString().equals("XMAS") || sub.toString().equals("SAMX")) {
-                    count++;
+                    if ((uL == 'M' && dR == 'S') || (uL == 'S' && dR == 'M')) {
+                        if ((uR == 'M' && dL == 'S') || (uR == 'S' && dL == 'M')) {
+                            sumTwo++;
+                        }
+                    }
                 }
-
             }
         }
 
-        return count;
-    }
-    
-    private static int diagonal (int move, int x, int y, char next) {
-
-        if (x >= wordSearch.length || y >= wordSearch[0].length) {
-            return 0;
-        } else if (wordSearch[x][y] == next) {
-            if (next == 'M') {
-                return diagonal(move,x + dir[move][0], y + dir[move][1], 'A');
-            } else if (next == 'A') {
-                return diagonal(move,x + dir[move][0], y + dir[move][1], 'S');
-            } else if (next == 'S'){
-                return 1;
-            }
-        }
-        return 0;
+        System.out.println("Part 2: " + sumTwo);
     }
 }
