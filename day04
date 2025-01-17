@@ -1,0 +1,116 @@
+import java.io.*;
+import java.util.*;
+
+public class day04 {
+
+    // {{ up right }, {down right}, {down left}, {up left}
+    private static int[][] dir = {{-1, 1}, {1, 1}, {-1, 1}, {-1, -1}};
+    private static char[][] wordSearch;
+
+    public static void main(String[] args) {
+
+        List<String> lines = new ArrayList<>();
+        int sumOne = 0;
+
+        try {
+            File myObj = new File("src/data/data04.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                lines.add(myReader.nextLine());
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        int row = lines.size(), col = lines.get(0).length();
+        wordSearch = new char[lines.get(0).length()][lines.size()];
+
+        for (int i = 0; i < lines.size(); i++) {
+            sumOne += leftRight(lines.get(i));
+            wordSearch[i] = lines.get(i).toCharArray();
+        }
+
+        for (int i = 0; i < row - 3; i++) {
+
+            for (int j = 0; j < col; j++) {
+                if (wordSearch[i][j] =='X' || wordSearch[i][j] =='S'){
+                    StringBuilder sub = new StringBuilder();
+                    sub.append(wordSearch[i][j]);
+                    sub.append(wordSearch[i+1][j]);
+                    sub.append(wordSearch[i+2][j]);
+                    sub.append(wordSearch[i+3][j]);
+
+                    if (sub.toString().equals("XMAS") || sub.toString().equals("SAMX")) {
+                        sumOne++;
+                    }
+                }
+            }
+
+            for (int j = 0; j < col - 3; j++) {
+                if (wordSearch[i][j] == 'X' || wordSearch[i][j] == 'S') {
+                    StringBuilder sub = new StringBuilder();
+                    sub.append(wordSearch[i][j]);
+                    sub.append(wordSearch[i + 1][j + 1]);
+                    sub.append(wordSearch[i + 2][j + 2]);
+                    sub.append(wordSearch[i + 3][j + 3]);
+
+                    if (sub.toString().equals("XMAS") || sub.toString().equals("SAMX")) {
+                        sumOne++;
+                    }
+                }
+            }
+
+            for (int j = 3; j < col; j++) {
+                if (wordSearch[i][j] == 'X' || wordSearch[i][j] == 'S') {
+                    StringBuilder sub = new StringBuilder();
+                    sub.append(wordSearch[i][j]);
+                    sub.append(wordSearch[i + 1][j - 1]);
+                    sub.append(wordSearch[i + 2][j - 2]);
+                    sub.append(wordSearch[i + 3][j - 3]);
+
+                    if (sub.toString().equals("XMAS") || sub.toString().equals("SAMX")) {
+                        sumOne++;
+                    }
+                }
+            }
+        }
+
+        System.out.println("Part 1: " + sumOne);
+    }
+
+    private static int leftRight(String s) {
+
+        int count = 0;
+
+        for (int i = 0; i < s.length() - 3; i++) {
+            if (s.charAt(i) == 'X' || s.charAt(i) == 'S') {
+
+                String sub = s.substring(i, i + 4);
+
+                if (sub.toString().equals("XMAS") || sub.toString().equals("SAMX")) {
+                    count++;
+                }
+
+            }
+        }
+
+        return count;
+    }
+    
+    private static int diagonal (int move, int x, int y, char next) {
+
+        if (x >= wordSearch.length || y >= wordSearch[0].length) {
+            return 0;
+        } else if (wordSearch[x][y] == next) {
+            if (next == 'M') {
+                return diagonal(move,x + dir[move][0], y + dir[move][1], 'A');
+            } else if (next == 'A') {
+                return diagonal(move,x + dir[move][0], y + dir[move][1], 'S');
+            } else if (next == 'S'){
+                return 1;
+            }
+        }
+        return 0;
+    }
+}
