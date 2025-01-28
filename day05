@@ -1,0 +1,63 @@
+import java.io.*;
+import java.util.*;
+
+public class day05 {
+
+
+
+    public static void main(String[] args) {
+
+        boolean first = true;
+        List<String>[] after = new ArrayList[100];
+        List<String> updates = new ArrayList<>();
+        int sumOne = 0;
+
+        for (int i = 10; i < 100; i++) {
+            after[i] = new ArrayList<String>();
+        }
+
+        try {
+            File myObj = new File("src/data/data05.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                String line = myReader.nextLine();
+                if (line.equals("")) {
+                    first = false;
+                }
+                if (first) {
+                    int x = Integer.parseInt(line.substring(0,2));
+                    String y = line.substring(3);
+                    after[x].add(y);
+                } else {
+                    updates.add(line);
+                }
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        for (int i = 1; i < updates.size(); i++) {
+            String[] up = updates.get(i).split(",");
+            boolean broke = false;
+            int mid = up.length / 2;
+
+            for (int j = up.length - 1; j > 0; j--) {
+                for (int k = j - 1; k >= 0; k--) {
+                    if (after[Integer.parseInt(up[j])].contains(up[k])) {
+                        broke = true;
+                        break;
+                    }
+                }
+                if (broke) {
+                    break;
+                }
+            }
+            if (!broke) {
+                sumOne += Integer.parseInt(up[mid]);
+            }
+        }
+
+        System.out.println("Part 1: " + sumOne);
+    }
+}
