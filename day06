@@ -1,0 +1,86 @@
+import java.io.*;
+import java.util.*;
+
+public class day06 {
+
+    public static void main(String[] args) {
+
+        List<String> file = new ArrayList<>();
+
+        try {
+            File myObj = new File("src/data/data06.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                file.add(myReader.nextLine());
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        List<int[]> obs = new ArrayList<>();
+        List<int[]> visited = new ArrayList<>();
+        // direction[[up], [right], [down], [left]]
+        int[][] direction = new int[][]{{-1,0}, {0,1}, {1,0}, {0,-1}};
+        int[] pos = new int[2];
+        int height = file.size(), width = file.get(0).length(), dir = 0;
+
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+
+                switch (file.get(i).charAt(j)) {
+                    case '#':
+                        obs.add(new int[]{i, j});
+                        break;
+                    case '^':
+                        dir = 0;
+                        pos = new int[]{i, j};
+                        break;
+                    case '>':
+                        dir = 1;
+                        pos = new int[]{i, j};
+                        break;
+                    case 'v':
+                        dir = 2;
+                        pos = new int[]{i, j};
+                        break;
+                    case '<':
+                        dir = 3;
+                        pos = new int[]{i, j};
+                        break;
+                }
+            }
+        }
+
+        while ((0 <= pos[0] && pos[0] < height)&& (0 <= pos[1] && pos[1] < width)) {
+
+            int tempX = pos[0] + direction[dir][0];
+            int tempY = pos[1] + direction[dir][1];
+
+            if (has(obs, tempX, tempY)) {
+                // turns right
+                dir++;
+                dir %= 4;
+            } else {
+                // move 1 step, add if new
+                pos = new int[]{tempX, tempY};
+                if (!has(visited, tempX, tempY)) {
+                    visited.add(new int[]{tempX, tempY});
+                }
+            }
+        }
+
+        // Subtract 1 to remove "outside" end position
+        System.out.println("Part 1: " + (visited.size() - 1));
+    }
+
+    private static boolean has(List<int[]> l, int x, int y) {
+
+        for (int i = 0; i < l.size(); i++) {
+            if (l.get(i)[0] == x && l.get(i)[1] == y) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
