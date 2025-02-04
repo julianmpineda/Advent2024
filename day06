@@ -6,9 +6,12 @@ public class day06 {
     // direction[[up], [right], [down], [left]]
     private static int[][] direction = new int[][]{{-1,0}, {0,1}, {1,0}, {0,-1}};
     private static List<int[]> obs = new ArrayList<>();
+    private static List<int[]> visitOne;
     private static int height, width;
 
     public static void main(String[] args) {
+
+        final long startTime = System.currentTimeMillis();
 
         List<String> file = new ArrayList<>();
 
@@ -57,30 +60,32 @@ public class day06 {
                 }
             }
         }
-        
+
         //Part 1:
 
-        List<int[]> visitOne = runOne(obs, start);
+        visitOne = runOne(start);
 
         System.out.println("Part 1: " + visitOne.size());
-        
+        System.out.println((System.currentTimeMillis() - startTime) + " ms");
+
         //Part 2:
-        
+
         /*
             Places a block in every visited space visited in Part 1,
-            and then simulates the guard again. Brute force but doesn't 
-            take too long. 
+            and then simulates the guard again. Brute force but doesn't
+            take too long.
          */
 
         int end = obs.size();
 
         for (int m = 1; m < visitOne.size(); m++) {
             obs.add(visitOne.get(m));
-            two += runTwo(obs, start);
+            two += runTwo(visitOne.get(m - 1));
             obs.remove((end));
         }
 
         System.out.println("Part 2: " + two);
+        System.out.println((System.currentTimeMillis() - startTime) + " ms");
     }
 
     private static boolean has(List<int[]> l, int x, int y) {
@@ -103,7 +108,7 @@ public class day06 {
         return false;
     }
 
-    private static List<int[]> runOne(List<int[]> l, int[] start) {
+    private static List<int[]> runOne(int[] start) {
 
         List<int[]> visited = new ArrayList<>();
         int[] pos = start.clone();
@@ -116,8 +121,7 @@ public class day06 {
 
             if (has(obs, tempX, tempY)) {
                 // turns right
-                dir++;
-                dir %= 4;
+                dir = (dir + 1) % 4;
             } else {
                 // move 1 step, add if new
                 pos = new int[]{tempX, tempY, dir};
@@ -132,7 +136,7 @@ public class day06 {
         return visited;
     }
 
-    private static int runTwo(List<int[]> l, int[] start) {
+    private static int runTwo(int[] start) {
 
         List<int[]> visited = new ArrayList<>();
         int[] pos = start.clone();
@@ -150,7 +154,7 @@ public class day06 {
             } else {
                 // move 1 step, add if new
                 pos = new int[]{tempX, tempY, dir};
-                if (hasDir(visited, tempX, tempY, dir)) {
+                if ((hasDir(visited, tempX, tempY, dir))) {
                     return 1;
                 } else {
                     visited.add(new int[]{tempX, tempY, dir});
