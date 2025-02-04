@@ -3,6 +3,11 @@ import java.util.*;
 
 public class day06 {
 
+    // direction[[up], [right], [down], [left]]
+    private static int[][] direction = new int[][]{{-1,0}, {0,1}, {1,0}, {0,-1}};
+    private static List<int[]> obs = new ArrayList<>();
+    private static int height, width;
+
     public static void main(String[] args) {
 
         List<String> file = new ArrayList<>();
@@ -18,39 +23,91 @@ public class day06 {
             e.printStackTrace();
         }
 
-        List<int[]> obs = new ArrayList<>();
-        List<int[]> visited = new ArrayList<>();
-        // direction[[up], [right], [down], [left]]
-        int[][] direction = new int[][]{{-1,0}, {0,1}, {1,0}, {0,-1}};
-        int[] pos = new int[2];
-        int height = file.size(), width = file.get(0).length(), dir = 0;
+        // [posX, pos Y, dir]
+        int[] start = new int[3];
+        int two = 0;
+        height = file.size();
+        width = file.get(0).length();
 
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
+
+                /*
+                   I am not actually sure if '<', 'v', '>', appear as starting
+                   positions, or if the guard always starts by heading up.
+                   I've left them since it was never specified either way.
+                */
 
                 switch (file.get(i).charAt(j)) {
                     case '#':
                         obs.add(new int[]{i, j});
                         break;
                     case '^':
-                        dir = 0;
-                        pos = new int[]{i, j};
+                        start = new int[]{i, j, 0};
                         break;
                     case '>':
-                        dir = 1;
-                        pos = new int[]{i, j};
+                        start = new int[]{i, j, 1};
                         break;
                     case 'v':
-                        dir = 2;
-                        pos = new int[]{i, j};
+                        start = new int[]{i, j, 2};
                         break;
                     case '<':
-                        dir = 3;
-                        pos = new int[]{i, j};
+                        start = new int[]{i, j, 3};
                         break;
                 }
             }
         }
+        
+        //Part 1:
+
+        List<int[]> visitOne = runOne(obs, start);
+
+        System.out.println("Part 1: " + visitOne.size());
+        
+        //Part 2:
+        
+        /*
+            Places a block in every visited space visited in Part 1,
+            and then simulates the guard again. Brute force but doesn't 
+            take too long. 
+         */
+
+        int end = obs.size();
+
+        for (int m = 1; m < visitOne.size(); m++) {
+            obs.add(visitOne.get(m));
+            two += runTwo(obs, start);
+            obs.remove((end));
+        }
+
+        System.out.println("Part 2: " + two);
+    }
+
+    private static boolean has(List<int[]> l, int x, int y) {
+
+        for (int i = 0; i < l.size(); i++) {
+            if (l.get(i)[0] == x && l.get(i)[1] == y) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean hasDir(List<int[]> l, int x, int y, int d) {
+
+        for (int i = 0; i < l.size(); i++) {
+            if (l.get(i)[0] == x && l.get(i)[1] == y && l.get(i)[2] == d) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static List<int[]> runOne(List<int[]> l, int[] start) {
+
+        List<int[]> visited = new ArrayList<>();
+        int[] pos = start.clone();
+        int dir = start[2];
 
         while ((0 <= pos[0] && pos[0] < height)&& (0 <= pos[1] && pos[1] < width)) {
 
@@ -63,24 +120,44 @@ public class day06 {
                 dir %= 4;
             } else {
                 // move 1 step, add if new
-                pos = new int[]{tempX, tempY};
+                pos = new int[]{tempX, tempY, dir};
                 if (!has(visited, tempX, tempY)) {
-                    visited.add(new int[]{tempX, tempY});
+                    visited.add(new int[]{tempX, tempY, dir});
                 }
             }
         }
 
-        // Subtract 1 to remove "outside" end position
-        System.out.println("Part 1: " + (visited.size() - 1));
+        visited.remove(visited.size()-1);
+
+        return visited;
     }
 
-    private static boolean has(List<int[]> l, int x, int y) {
+    private static int runTwo(List<int[]> l, int[] start) {
 
-        for (int i = 0; i < l.size(); i++) {
-            if (l.get(i)[0] == x && l.get(i)[1] == y) {
-                return true;
+        List<int[]> visited = new ArrayList<>();
+        int[] pos = start.clone();
+        int dir = start[2];
+
+        while ((0 <= pos[0] && pos[0] < height)&& (0 <= pos[1] && pos[1] < width)) {
+
+            int tempX = pos[0] + direction[dir][0];
+            int tempY = pos[1] + direction[dir][1];
+
+            if (has(obs, tempX, tempY)) {
+                // turns right
+                dir++;
+                dir %= 4;
+            } else {
+                // move 1 step, add if new
+                pos = new int[]{tempX, tempY, dir};
+                if (hasDir(visited, tempX, tempY, dir)) {
+                    return 1;
+                } else {
+                    visited.add(new int[]{tempX, tempY, dir});
+                }
             }
         }
-        return false;
+
+        return 0;
     }
 }
