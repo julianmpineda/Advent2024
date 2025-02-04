@@ -11,9 +11,8 @@ public class day06 {
 
     public static void main(String[] args) {
 
-        final long startTime = System.currentTimeMillis();
-
         List<String> file = new ArrayList<>();
+        final long startTime = System.currentTimeMillis();
 
         try {
             File myObj = new File("src/data/data06.txt");
@@ -26,7 +25,7 @@ public class day06 {
             e.printStackTrace();
         }
 
-        // [posX, pos Y, dir]
+        // [pos X, pos Y, dir]
         int[] start = new int[3];
         int two = 0;
         height = file.size();
@@ -149,10 +148,9 @@ public class day06 {
 
             if (has(obs, tempX, tempY)) {
                 // turns right
-                dir++;
-                dir %= 4;
+                dir = (dir + 1) % 4;
             } else {
-                // move 1 step, add if new
+                // move 1 step, add if new, if not, return 1 since it must be a loop.
                 pos = new int[]{tempX, tempY, dir};
                 if ((hasDir(visited, tempX, tempY, dir))) {
                     return 1;
