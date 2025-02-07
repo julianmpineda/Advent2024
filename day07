@@ -2,12 +2,11 @@ import java.io.*;
 import java.util.*;
 
 public class day07 {
-
-    public static List<String> file = new ArrayList<>();;
     public static void main(String[] args) {
 
         final long startTime = System.currentTimeMillis();
-        long sumOne = 0L;
+        List<String> file = new ArrayList<>();
+        long sumOne = 0L, sumTwo = 0L;
 
         try {
             File myObj = new File("src/data/data07.txt");
@@ -29,27 +28,40 @@ public class day07 {
                 equation[i] = Long.parseLong(sArr[i]);
             }
 
-            sumOne += (next(equation, 2, equation[1])) ? equation[0] : 0;
+            sumOne += (plusMult(equation, 2, equation[1])) ? equation[0] : 0;
+            sumTwo += (plusMultConcat(equation, 2, equation[1])) ? equation[0] : 0;
 
         }
 
         System.out.println("Part 1: " + sumOne);
+        System.out.println("Part 2: " + sumTwo);
         System.out.println((System.currentTimeMillis() - startTime) + " ms");
     }
 
-    private static boolean next(Long[] e, int pos, long sum) {
+    private static boolean plusMult(Long[] e, int pos, long sum) {
 
         if (pos == e.length) {
-            if (sum == e[0]) {
-                return true;
-            } else {
-                return false;
-            }
+            return sum == e[0];
         } else {
             long sumPlus = sum + e[pos];
             long sumMult = sum * e[pos];
             pos++;
-            return ((next(e, pos, sumPlus)|| next(e, pos, sumMult)));
+            
+            return ((plusMult(e, pos, sumPlus)|| plusMult(e, pos, sumMult)));
+        }
+    }
+
+    private static boolean plusMultConcat(Long[] e, int pos, long sum) {
+
+        if (pos == e.length) {
+            return sum == e[0];
+        } else {
+            long sumPlus = sum + e[pos];
+            long sumMult = sum * e[pos];
+            long sumCon = Long.parseLong("" + sum + e[pos]);
+            pos++;
+            
+            return plusMultConcat(e, pos, sumPlus)|| plusMultConcat(e, pos, sumMult) || plusMultConcat(e, pos, sumCon);
         }
     }
 }
