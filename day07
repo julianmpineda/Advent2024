@@ -1,0 +1,55 @@
+import java.io.*;
+import java.util.*;
+
+public class day07 {
+
+    public static List<String> file = new ArrayList<>();;
+    public static void main(String[] args) {
+
+        final long startTime = System.currentTimeMillis();
+        long sumOne = 0L;
+
+        try {
+            File myObj = new File("src/data/data07.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                file.add(myReader.nextLine());
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        for (String s : file) {
+
+            String[] sArr = s.split(": | ");
+            Long[] equation = new Long[sArr.length];
+
+            for (int i = 0; i < sArr.length; i++) {
+                equation[i] = Long.parseLong(sArr[i]);
+            }
+
+            sumOne += (next(equation, 2, equation[1])) ? equation[0] : 0;
+
+        }
+
+        System.out.println("Part 1: " + sumOne);
+        System.out.println((System.currentTimeMillis() - startTime) + " ms");
+    }
+
+    private static boolean next(Long[] e, int pos, long sum) {
+
+        if (pos == e.length) {
+            if (sum == e[0]) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            long sumPlus = sum + e[pos];
+            long sumMult = sum * e[pos];
+            pos++;
+            return ((next(e, pos, sumPlus)|| next(e, pos, sumMult)));
+        }
+    }
+}
