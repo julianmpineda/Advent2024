@@ -1,0 +1,83 @@
+import java.io.*;
+import java.util.*;
+
+public class day08 {
+
+    private static Map<Character, List<int[]>> antennas = new HashMap<>();
+    private static Set<int[]> antinodes = new HashSet<>();
+
+    public static void main(String[] args) {
+
+        final long startTime = System.currentTimeMillis();
+        List<String> file = new ArrayList<>();
+
+        try {
+            File myObj = new File("src/data/data08.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                file.add(myReader.nextLine());
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        int yMax = file.size(), xMax = file.get(0).length();
+
+        for (int i = 0; i < yMax; i++) {
+            for (int j = 0; j < xMax; j++) {
+                char c = file.get(i).charAt(j);
+
+                if (c != '.') {
+                    antennas.putIfAbsent(c, new ArrayList<>());
+                    antennas.get(c).add(new int[]{i, j});
+                }
+            }
+        }
+
+        for (char key : antennas.keySet()) {
+            for (int m = 0; m < antennas.get(key).size(); m++) {
+                for (int n = m + 1; n < antennas.get(key).size(); n++) {
+                    int[] antOne = antennas.get(key).get(m);
+                    int[] antTwo = antennas.get(key).get(n);
+                  
+                    int slopeY = antOne[0] - antTwo[0];
+                    int slopeX = antOne[1] - antTwo[1];
+
+                    int topX = antOne[1] + slopeX;
+                    int topY = antOne[0] + slopeY;
+
+                    if (topX >= 0 && topX < xMax && topY >= 0 && topY < yMax) {
+                        if (!has(topY, topX)) {
+                            antinodes.add(new int[]{topY, topX});
+                        }
+                    }
+
+                    int botX = antTwo[1] - slopeX;
+                    int botY = antTwo[0] - slopeY;
+
+                    if (botX >= 0 && botX < xMax && botY >= 0 && botY < yMax) {
+                        if (!has(botY, botX)) {
+                            antinodes.add(new int[]{botY, botX});
+                        }
+                    }
+                }
+            }
+        }
+
+        System.out.println("Part 1: " + antinodes.size());
+        System.out.println((System.currentTimeMillis() - startTime) + "ms");
+
+    }
+
+    private static boolean has(int y, int x) {
+
+        for (int[] a : antinodes) {
+            if (a[0] == y && a[1] == x) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+}
