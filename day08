@@ -27,12 +27,10 @@ public class day08 {
 
         yMax = file.size();
         xMax = file.get(0).length();
-        board = new char[yMax][xMax];
 
         for (int i = 0; i < yMax; i++) {
             for (int j = 0; j < xMax; j++) {
                 char c = file.get(i).charAt(j);
-                board[i][j] = c;
 
                 if (c != '.') {
                     antennas.putIfAbsent(c, new ArrayList<>());
