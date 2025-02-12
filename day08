@@ -3,8 +3,11 @@ import java.util.*;
 
 public class day08 {
 
+    private static char[][] board;
     private static Map<Character, List<int[]>> antennas = new HashMap<>();
     private static Set<int[]> antinodes = new HashSet<>();
+    private static Set<int[]> lineNodes = new HashSet<>();
+    private static int yMax, xMax;
 
     public static void main(String[] args) {
 
@@ -22,15 +25,19 @@ public class day08 {
             e.printStackTrace();
         }
 
-        int yMax = file.size(), xMax = file.get(0).length();
+        yMax = file.size();
+        xMax = file.get(0).length();
+        board = new char[yMax][xMax];
 
         for (int i = 0; i < yMax; i++) {
             for (int j = 0; j < xMax; j++) {
                 char c = file.get(i).charAt(j);
+                board[i][j] = c;
 
                 if (c != '.') {
                     antennas.putIfAbsent(c, new ArrayList<>());
                     antennas.get(c).add(new int[]{i, j});
+                    lineNodes.add(new int[]{i, j});
                 }
             }
         }
@@ -40,7 +47,7 @@ public class day08 {
                 for (int n = m + 1; n < antennas.get(key).size(); n++) {
                     int[] antOne = antennas.get(key).get(m);
                     int[] antTwo = antennas.get(key).get(n);
-                  
+
                     int slopeY = antOne[0] - antTwo[0];
                     int slopeX = antOne[1] - antTwo[1];
 
@@ -48,36 +55,78 @@ public class day08 {
                     int topY = antOne[0] + slopeY;
 
                     if (topX >= 0 && topX < xMax && topY >= 0 && topY < yMax) {
-                        if (!has(topY, topX)) {
+                        if (!has(topY, topX, antinodes)) {
                             antinodes.add(new int[]{topY, topX});
                         }
+                        if (!has(topY, topX, lineNodes)) {
+                            lineNodes.add(new int[]{topY, topX});
+                        }
+                        upAntinodes(topY, topX, new int[]{slopeY,slopeX});
                     }
 
                     int botX = antTwo[1] - slopeX;
                     int botY = antTwo[0] - slopeY;
 
                     if (botX >= 0 && botX < xMax && botY >= 0 && botY < yMax) {
-                        if (!has(botY, botX)) {
+                        if (!has(botY, botX, antinodes)) {
                             antinodes.add(new int[]{botY, botX});
                         }
+                        if (!has(botY, botX, lineNodes)) {
+                            lineNodes.add(new int[]{botY, botX});
+                        }
+                        downAntinodes(botY, botX, new int[]{slopeY,slopeX});
                     }
                 }
             }
         }
 
         System.out.println("Part 1: " + antinodes.size());
+        System.out.println("Part 2: " + (lineNodes.size()));
         System.out.println((System.currentTimeMillis() - startTime) + "ms");
-
     }
 
-    private static boolean has(int y, int x) {
+    private static boolean has(int y, int x, Set<int[]> n) {
 
-        for (int[] a : antinodes) {
+        for (int[] a : n) {
             if (a[0] == y && a[1] == x) {
                 return true;
             }
         }
-        
+
         return false;
+    }
+
+    private static int upAntinodes(int y, int x, int[] slope) {
+
+        int topY = y + slope[0];
+        int topX = x + slope[1];
+
+        if (topX < 0 || topX >= xMax || topY < 0 || topY >= yMax) {
+            return 0;
+        }
+
+        if (!has(topY, topX, lineNodes)) {
+            lineNodes.add(new int[]{topY, topX});
+        }
+        upAntinodes(topY, topX, slope);
+
+        return 0;
+    }
+
+    private static int downAntinodes(int y, int x, int[] slope) {
+
+        int botY = y - slope[0];
+        int botX = x - slope[1];
+
+        if (botX < 0 || botX >= xMax || botY < 0 || botY >= yMax) {
+            return 0;
+        }
+
+        if (!has(botY, botX, lineNodes)) {
+            lineNodes.add(new int[]{botY, botX});
+        }
+        downAntinodes(botY, botX, slope);
+
+        return 0;
     }
 }
