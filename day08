@@ -3,7 +3,6 @@ import java.util.*;
 
 public class day08 {
 
-    private static char[][] board;
     private static Map<Character, List<int[]>> antennas = new HashMap<>();
     private static Set<int[]> antinodes = new HashSet<>();
     private static Set<int[]> lineNodes = new HashSet<>();
@@ -79,7 +78,7 @@ public class day08 {
         }
 
         System.out.println("Part 1: " + antinodes.size());
-        System.out.println("Part 2: " + (lineNodes.size()));
+        System.out.println("Part 2: " + lineNodes.size());
         System.out.println((System.currentTimeMillis() - startTime) + "ms");
     }
 
