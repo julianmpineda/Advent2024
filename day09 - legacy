@@ -1,0 +1,56 @@
+import java.util.*;
+
+public class day09 {
+
+  public static void main(String[] args) {
+
+        String line = "2333133121414131402";
+        int len = line.length(), count = 0, cCount = 0, rCount = 0, checkSum = 0, dotCount = 0;
+        StringBuilder code = new StringBuilder();
+
+        for (int i = 0; i < len; i++) {
+            int jLen = line.charAt(i) - '0';
+            char c;
+
+            if (i % 2 == 0) {
+                c = (char)(count + '0');
+                cCount += line.charAt(i) - '0';
+                count++;
+            } else {
+                dotCount += line.charAt(i) - '0';
+                c = 'a';
+
+            }
+
+            for (int j = 0; j < jLen; j++) {
+                code.append(c);
+            }
+        }
+
+        String expand = code.toString();
+        String trimmed = expand.replaceAll("a", "");
+        String rTrimmed = code.reverse().toString().replaceAll("a", "");
+        code.setLength(0);
+        count = 0;
+
+        for (int m = 0; m < expand.length(); m++) {
+            if (rCount + count >= cCount) {
+                code.append('a');
+            } else if (expand.charAt(m) == 'a') {
+                code.append(rTrimmed.charAt(rCount));
+                rCount++;
+            } else {
+                code.append(trimmed.charAt(count));
+                count++;
+            }
+        }
+
+        String compact = code.toString().replaceAll("a", "");
+
+        for (int r = 0; r < compact.length(); r++) {
+            checkSum += r * (compact.charAt(r) - '0');
+        }
+
+        System.out.println("Part 1: " + checkSum);
+        System.out.println((System.currentTimeMillis() - startTime) + "ms");
+    }
