@@ -30,7 +30,7 @@ public class day09 {
             }
         }
 
-        int back = (total % 2 == 0) ? total - 1 : total - ((diskMap.charAt(diskMap.length() - 1)) - '0') - 1;
+        int back = (diskMap.length() % 2 == 0) ? total - ((diskMap.charAt(diskMap.length() - 1)) - '0') - 1 : total - 1;
 
         for (int m = 0; m < totalFiles; m++) {
 
