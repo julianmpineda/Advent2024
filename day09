@@ -1,0 +1,52 @@
+public class day09 {
+
+    private static String diskMap = "2333133121414131402";
+
+    public static void main(String[] args) {
+
+        final long startTime = System.currentTimeMillis();
+        int count = 0, pos = 0, total = 0, totalFiles = 0;
+        long checkSum = 0L;
+
+        for (char c : diskMap.toCharArray()) {
+            total += (c - '0');
+        }
+
+        int[] files = new int[total];
+
+        for (int i = 0; i < diskMap.length(); i++) {
+            int x = diskMap.charAt(i) - '0';
+            int fill = -1;
+
+            if (i % 2 == 0) {
+                fill = count;
+                count++;
+                totalFiles += x;
+            }
+
+            for (int j = 0; j <  x; j++) {
+                files[pos] = fill;
+                pos++;
+            }
+        }
+
+        int back = (total % 2 == 0) ? total - 1 : total - ((diskMap.charAt(diskMap.length() - 1)) - '0') - 1;
+
+        for (int m = 0; m < totalFiles; m++) {
+
+            if (files[m] != -1) {
+                checkSum += files[m] * m;
+            } else {
+                checkSum += files[back] * m;
+                back--;
+
+                while (files[back] == -1) {
+                    back--;
+                }
+            }
+        }
+
+        System.out.println("Part 1: " + checkSum);
+        System.out.println((System.currentTimeMillis() - startTime) + "ms");
+    }
+}
