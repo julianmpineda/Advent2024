@@ -1,10 +1,14 @@
+import java.util.*;
+
 public class day09 {
 
     private static String diskMap = "2333133121414131402";
 
+    
     public static void main(String[] args) {
 
         final long startTime = System.currentTimeMillis();
+        List<int[]> blocks = new ArrayList<>();
         int count = 0, pos = 0, total = 0, totalFiles = 0;
         long checkSum = 0L;
 
@@ -28,6 +32,8 @@ public class day09 {
                 files[pos] = fill;
                 pos++;
             }
+
+            blocks.add(new int[]{fill, x});
         }
 
         int back = (diskMap.length() % 2 == 0) ? total - ((diskMap.charAt(diskMap.length() - 1)) - '0') - 1 : total - 1;
@@ -35,9 +41,9 @@ public class day09 {
         for (int m = 0; m < totalFiles; m++) {
 
             if (files[m] != -1) {
-                checkSum += files[m] * m;
+                checkSum += (long) files[m] * m;
             } else {
-                checkSum += files[back] * m;
+                checkSum += (long) files[back] * m;
                 back--;
 
                 while (files[back] == -1) {
@@ -47,6 +53,55 @@ public class day09 {
         }
 
         System.out.println("Part 1: " + checkSum);
-        System.out.println((System.currentTimeMillis() - startTime) + "ms");
+        final long p1Time = System.currentTimeMillis();
+        System.out.println((p1Time - startTime) + "ms");
+
+        // Part 2 Code
+
+        checkSum = 0L;
+        back = (diskMap.length() % 2 == 0) ? diskMap.length() - 2: diskMap.length() - 1;
+        count = 0;
+        pos = 1;
+
+        for (int r = back; r >= 0; r--) {
+            boolean first = true;
+
+            if (blocks.get(r)[0] > -1) {
+                for (int s = pos; s < r; s++) {
+                    if (blocks.get(s)[0] == -1) {
+                        if (blocks.get(s)[1] == blocks.get(r)[1]) {
+                            int[] temp = blocks.get(r).clone();
+                            blocks.set(r, blocks.get(s).clone());
+                            blocks.set(s, temp.clone());
+                            pos = first ? s : pos;
+                            break;
+                        } else if (blocks.get(s)[1] > blocks.get(r)[1]) {
+                            int leftover = blocks.get(s)[1] - blocks.get(r)[1];
+                            blocks.set(s, blocks.get(r).clone());
+                            blocks.get(r)[0] = -1;
+                            blocks.add(s + 1, new int[]{-1, leftover});
+                            pos = first ? (s + 1) : pos;
+                            break;
+                        } else {
+                            first = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int[] x : blocks) {
+            if (x[0] > -1) {
+                for (int y = 0; y < x[1]; y++) {
+                    checkSum += (long) x[0] * count;
+                    count++;
+                }
+            } else {
+                count += x[1];
+            }
+        }
+
+        System.out.println("Part 2: " + checkSum);
+        System.out.println((System.currentTimeMillis() - p1Time) + "ms");
     }
 }
