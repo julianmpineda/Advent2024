@@ -1,0 +1,103 @@
+import java.util.*;
+import java.io.*;
+
+public class day10 {
+
+    private static int[][] map;
+    private static int maxWidth, maxHeight;
+    private static Map<String, Set<String>> trails = new HashMap<>();
+
+    public static void main(String[] args) {
+
+        final long startTime = System.currentTimeMillis();
+        List<String> file = new ArrayList<>();
+
+        try {
+            File myObj = new File("src/data/data10.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                file.add(myReader.nextLine());
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Set<int[]> trailHeads = new HashSet<>();
+        maxWidth = file.get(0).length();
+        maxHeight = file.size();
+        map = new int[maxHeight][maxWidth];
+
+        for (int s = 0; s < maxHeight; s++) {
+            for (int t = 0; t < maxWidth; t++) {
+                map[s][t] = file.get(s).charAt(t) - '0';
+
+                if (map[s][t] == 0) {
+                    trailHeads.add(new int[]{s, t});
+                }
+            }
+        }
+
+        for (int[] t : trailHeads) {
+            path(t[0], t[1], int2str(t));
+        }
+
+        int sum = 0;
+
+        for (String s : trails.keySet()) {
+            sum += trails.get(s).size();
+        }
+
+        final long p1Time = System.currentTimeMillis();
+        System.out.println((p1Time - startTime) + "ms");
+        System.out.println("Part 1: " + sum);
+
+    }
+    public static int path(int x, int y, String head) {
+
+        if (map[x][y] == 9) {
+            trails.putIfAbsent(head, new HashSet<>());
+            trails.get(head).add(int2str(new int[]{x, y}));
+            return -1;
+        }
+
+        // North / Up
+        if (x - 1 > -1) {
+            if (map[x - 1][y] == map[x][y] + 1) {
+                path(x - 1 , y, head);
+            }
+        }
+
+        // East / Right
+        if (y + 1 < maxWidth) {
+            if (map[x][y + 1] == map[x][y] + 1) {
+                path(x, y + 1, head);
+            }
+        }
+
+        // South / Down
+        if (x + 1 < maxHeight) {
+            if (map[x + 1][y] == map[x][y] + 1) {
+                path(x + 1, y, head);
+            }
+        }
+
+        // West / Left
+        if (y - 1 > -1) {
+            if (map[x][y - 1] == map[x][y] + 1) {
+                path(x, y - 1, head);
+            }
+        }
+
+        return -1;
+    }
+
+    // Converts coordinate arrays into a String "x,y"
+    public static String int2str(int[] i) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(i[0]);
+        sb.append(',');
+        sb.append(i[1]);
+        return sb.toString();
+    }
+}
