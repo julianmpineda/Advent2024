@@ -6,6 +6,7 @@ public class day10 {
     private static int[][] map;
     private static int maxWidth, maxHeight;
     private static Map<String, Set<String>> trails = new HashMap<>();
+    private static int trailsDistinct = 0;
 
     public static void main(String[] args) {
 
@@ -42,15 +43,16 @@ public class day10 {
             path(t[0], t[1], int2str(t));
         }
 
-        int sum = 0;
+        int sum = 0, disSum = 0;
 
-        for (String s : trails.keySet()) {
-            sum += trails.get(s).size();
+        for (Set<String> s : trails.values()) {
+            sum += s.size();
         }
 
-        final long p1Time = System.currentTimeMillis();
-        System.out.println((p1Time - startTime) + "ms");
+        final long runtime = System.currentTimeMillis();
         System.out.println("Part 1: " + sum);
+        System.out.println("Part 2: " + trailsDistinct);
+        System.out.println((runtime - startTime) + "ms");
 
     }
     public static int path(int x, int y, String head) {
@@ -58,6 +60,7 @@ public class day10 {
         if (map[x][y] == 9) {
             trails.putIfAbsent(head, new HashSet<>());
             trails.get(head).add(int2str(new int[]{x, y}));
+            trailsDistinct++;
             return -1;
         }
 
