@@ -1,14 +1,76 @@
 import java.util.*;
-
 public class day11 {
     public static void main(String[] args) {
 
         final long startTime = System.currentTimeMillis();
-        String stonesStart = "125 17";
+        String stonesStart = "0 4 4979 24 4356119 914 85734 698829";
+        Map<String, Long> stonesMap = new HashMap<>();
+
+        for (String s : stonesStart.split(" ")) {
+            stonesMap.put(s, (stonesMap.getOrDefault(s,0L) + 1));
+        }
+
+        for (int i = 0; i < 25; i++) {
+            stonesMap = blink(stonesMap);
+        }
+
+        Long sum = 0L;
+
+        for (Long l : stonesMap.values()) {
+            sum += l;
+        }
+
+        System.out.println("Part 1: " + sum);
+
+        for (int i = 0; i < 50; i++) {
+            stonesMap = blink(stonesMap);
+        }
+
+        sum = 0L;
+
+        for (Long l : stonesMap.values()) {
+            sum += l;
+        }
+
+        final long endTime = System.currentTimeMillis();
+        System.out.println("Part 2: " + sum);
+        System.out.println((endTime - startTime) + "ms");
+    }
+
+    public static Map<String, Long> blink(Map<String, Long> stonesMap) {
+        Map<String, Long> blinkStones = new HashMap<>();
+
+        for (String stone : stonesMap.keySet()) {
+            long num = stonesMap.get(stone);
+            String key = "", keyTwo = "";
+            
+            if (stone.equals("0")) {
+                key = "1";
+            } else if (stone.length() % 2 == 0) {
+                key = stone.substring(0, stone.length() / 2);
+                keyTwo = stone.substring(stone.length() / 2);
+            } else {
+                key = "" + (Long.parseLong(stone) * 2024);
+            }
+
+            blinkStones.put(key, (blinkStones.getOrDefault(key, 0L) + num));
+
+            if (!keyTwo.equals("")) {
+                blinkStones.put(keyTwo, (blinkStones.getOrDefault(keyTwo, 0L) + num));
+            }
+        }
+
+        return blinkStones;
+    }
+}
+
+/*
+        Legacy Part 1 Code
+
         List<String> stones = new ArrayList<>(
                 Arrays.asList(stonesStart.split(" ")));
 
-        for (int blink = 0; blink < 25; blink++) {
+        for (int b = 0; b < 25; b++) {
             for (int s = 0; s < stones.size(); s++) {
                 String rock = stones.get(s);
                 if (rock.equals("0")) {
@@ -27,8 +89,5 @@ public class day11 {
             }
         }
 
-        final long p1Time = System.currentTimeMillis();
-        System.out.println("Part 1: " + stones.size());
-        System.out.println((p1Time-startTime) + "ms");
-    }
-}
+ */
+
