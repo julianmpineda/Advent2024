@@ -1,0 +1,66 @@
+import java.io.*;
+import java.util.*;
+
+public class day12 {
+    private static char[][] garden;
+    private static int maxWidth, maxHeight;
+    private static Map<Character, Integer> perimeter = new HashMap<>();
+    private static Map<Character, Integer> area = new HashMap<>();
+
+    public static void main(String[] args) {
+
+        final long startTime = System.currentTimeMillis();
+        List<String> file = new ArrayList<>();
+
+        try {
+            File myObj = new File("src/data/data12.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                file.add(myReader.nextLine());
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        maxWidth = file.get(0).length();
+        maxHeight = file.size();
+        garden = new char[maxHeight][maxWidth];
+
+        for (int s = 0; s < maxHeight; s++) {
+            for (int t = 0; t < maxWidth; t++) {
+                char c =  file.get(s).charAt(t);
+                garden[s][t] = c;
+                perimeter.put(c, perimeter.getOrDefault(c, 0) + 4);
+                area.put(c, area.getOrDefault(c, 0) + 1);
+            }
+        }
+
+        for (int i = 0; i < maxHeight; i++) {
+            for (int j = 1; j < maxWidth; j++) {
+                if (garden[i][j] == garden[i][j - 1]) {
+                    perimeter.put(garden[i][j], perimeter.get(garden[i][j]) - 2);
+                }
+            }
+        }
+
+        for (int i = 1; i < maxHeight; i++) {
+            for (int j = 0; j < maxWidth; j++) {
+                if (garden[i][j] == garden[i - 1][j]) {
+                    perimeter.put(garden[i][j], perimeter.get(garden[i][j]) - 2);
+                }
+            }
+        }
+
+        int sum = 0;
+
+        for (char c : area.keySet()) {
+            sum += (area.get(c) * perimeter.get(c));
+        }
+
+        final long p1Time = System.currentTimeMillis();
+        System.out.println("Part 1: " + sum);
+        System.out.println((p1Time - startTime) + "ms");
+
+    }
+}
