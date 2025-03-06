@@ -3,9 +3,13 @@ import java.util.*;
 
 public class day12 {
     private static char[][] garden;
+    private static char[][] gardenVisited;
     private static int maxWidth, maxHeight;
-    private static Map<Character, Integer> perimeter = new HashMap<>();
-    private static Map<Character, Integer> area = new HashMap<>();
+    private static Map<String, Set<String>> tbEdges = new HashMap<>();
+    private static Map<String, Set<String>> lrEdges = new HashMap<>();
+    private static Map<String, Set<String>> tbRemoved = new HashMap<>();
+    private static Map<String, Set<String>> lrRemoved = new HashMap<>();
+    private static Map<String, Integer> area = new HashMap<>();
 
     public static void main(String[] args) {
 
@@ -26,41 +30,155 @@ public class day12 {
         maxWidth = file.get(0).length();
         maxHeight = file.size();
         garden = new char[maxHeight][maxWidth];
+        Map<String, Integer> plot = new HashMap<>();
 
         for (int s = 0; s < maxHeight; s++) {
             for (int t = 0; t < maxWidth; t++) {
                 char c =  file.get(s).charAt(t);
                 garden[s][t] = c;
-                perimeter.put(c, perimeter.getOrDefault(c, 0) + 4);
-                area.put(c, area.getOrDefault(c, 0) + 1);
             }
         }
+
+        gardenVisited = garden.clone();
 
         for (int i = 0; i < maxHeight; i++) {
-            for (int j = 1; j < maxWidth; j++) {
-                if (garden[i][j] == garden[i][j - 1]) {
-                    perimeter.put(garden[i][j], perimeter.get(garden[i][j]) - 2);
-                }
-            }
-        }
-
-        for (int i = 1; i < maxHeight; i++) {
             for (int j = 0; j < maxWidth; j++) {
-                if (garden[i][j] == garden[i - 1][j]) {
-                    perimeter.put(garden[i][j], perimeter.get(garden[i][j]) - 2);
+                if (gardenVisited[i][j] != '0') {
+                    fill(i, j, garden[i][j], int2str(i, j));
                 }
             }
         }
-
         int sum = 0;
 
-        for (char c : area.keySet()) {
-            sum += (area.get(c) * perimeter.get(c));
+        for (String s : area.keySet()) {
+            System.out.println("Region " + s + " has area " + area.get(s) + " and perimeter " + (lrEdges.get(s).size() + tbEdges.get(s).size()));
+            System.out.print("tbEdges: ");
+            for (String v : tbEdges.get(s)) {
+                System.out.print("{" + v + "}, ");
+            }
+            System.out.println();
+            System.out.print("lrEdges: ");
+            for (String h : lrEdges.get(s)) {
+                System.out.print("{" + h + "}, ");
+            }
+            System.out.println("\n");
+            sum += (area.get(s) * (lrEdges.get(s).size() + tbEdges.get(s).size()));
         }
 
         final long p1Time = System.currentTimeMillis();
         System.out.println("Part 1: " + sum);
         System.out.println((p1Time - startTime) + "ms");
 
+    }
+
+    public static int fill(int x, int y, char id, String head) {
+
+        gardenVisited[x][y] = '0';
+        area.putIfAbsent(head, 0);
+        area.put(head, (area.get(head) + 1));
+
+        String xy = int2str(x, y);
+        String yPlus = int2str(x, y + 1);
+        String xPlus = int2str(x + 1, y);
+
+        lrEdges.putIfAbsent(head, new HashSet<>());
+        lrRemoved.putIfAbsent(head, new HashSet<>());
+
+        if (!lrRemoved.get(head).contains(xy)) {
+            lrEdges.get(head).add(xy);
+        }
+        if (!lrRemoved.get(head).contains(yPlus)) {
+            lrEdges.get(head).add(yPlus);
+        }
+
+        tbEdges.putIfAbsent(head, new HashSet<>());
+        tbRemoved.putIfAbsent(head, new HashSet<>());
+
+        if (!tbRemoved.get(head).contains(xy)) {
+            tbEdges.get(head).add(xy);
+        }
+        if (!tbRemoved.get(head).contains(xPlus)) {
+            tbEdges.get(head).add(xPlus);
+        }
+
+        for (char[] c : garden) {
+            for (char v : c){
+                System.out.print(v);
+            }
+            System.out.println();
+        }
+        System.out.println("Region " + head + " has " + tbEdges.get(head).size() + " tbEdges and " + lrEdges.get(head).size()+ " lrEdges");
+        System.out.println();
+        // North / Up
+        if (x - 1 > -1) {
+            if (garden[x - 1][y] == id) {
+                tbEdges.get(head).remove(xy);
+                tbRemoved.get(head).add(xy);
+                System.out.println("removed " + xy);
+                fill(x - 1 , y, id, head);
+
+                if (gardenVisited[x - 1][y] == id) {
+                    return -1;
+                }
+
+            }
+        }
+
+        // East / Right
+        if (y + 1 < maxWidth) {
+            if (garden[x][y + 1] == id) {
+                lrEdges.get(head).remove(yPlus);
+                lrRemoved.get(head).add(yPlus);
+                System.out.println("removed " + yPlus);
+                fill(x, y + 1, id, head);
+
+                if (gardenVisited[x][y + 1] == id) {
+                    return -1;
+                }
+
+            }
+        }
+
+        // South / Down
+        if (x + 1 < maxHeight) {
+            if (garden[x + 1][y] == id) {
+                tbEdges.get(head).remove(xPlus);
+                tbRemoved.get(head).add(xPlus);
+                System.out.println("removed " + xPlus);
+                fill(x + 1, y, id, head);
+
+                if (gardenVisited[x + 1][y] == id) {
+                    return -1;
+                }
+
+
+            }
+        }
+
+        // West / Left
+        if (y - 1 > -1) {
+            if (garden[x][y - 1] == id) {
+                lrEdges.get(head).remove(xy);
+                lrRemoved.get(head).add(xy);
+                System.out.println("removed " + xy);
+                fill(x, y - 1, id, head);
+
+                if (gardenVisited[x][y - 1] == id) {
+                    return -1;
+                }
+
+
+            }
+        }
+
+        return -1;
+    }
+
+    public static String int2str(int x, int y) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(x);
+        sb.append(',');
+        sb.append(y);
+        return sb.toString();
     }
 }
