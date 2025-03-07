@@ -3,13 +3,13 @@ import java.util.*;
 
 public class day12 {
     private static char[][] garden;
-    private static char[][] gardenVisited;
+    private static Set<String> gardenVisited = new HashSet<>();
     private static int maxWidth, maxHeight;
     private static Map<String, Set<String>> tbEdges = new HashMap<>();
     private static Map<String, Set<String>> lrEdges = new HashMap<>();
     private static Map<String, Set<String>> tbRemoved = new HashMap<>();
     private static Map<String, Set<String>> lrRemoved = new HashMap<>();
-    private static Map<String, Integer> area = new HashMap<>();
+    private static Map<String, Set<String>> area = new HashMap<>();
 
     public static void main(String[] args) {
 
@@ -39,11 +39,9 @@ public class day12 {
             }
         }
 
-        gardenVisited = garden.clone();
-
         for (int i = 0; i < maxHeight; i++) {
             for (int j = 0; j < maxWidth; j++) {
-                if (gardenVisited[i][j] != '0') {
+                if (!gardenVisited.contains(int2str(i, j))) {
                     fill(i, j, garden[i][j], int2str(i, j));
                 }
             }
@@ -51,35 +49,26 @@ public class day12 {
         int sum = 0;
 
         for (String s : area.keySet()) {
-            System.out.println("Region " + s + " has area " + area.get(s) + " and perimeter " + (lrEdges.get(s).size() + tbEdges.get(s).size()));
-            System.out.print("tbEdges: ");
-            for (String v : tbEdges.get(s)) {
-                System.out.print("{" + v + "}, ");
-            }
-            System.out.println();
-            System.out.print("lrEdges: ");
-            for (String h : lrEdges.get(s)) {
-                System.out.print("{" + h + "}, ");
-            }
-            System.out.println("\n");
-            sum += (area.get(s) * (lrEdges.get(s).size() + tbEdges.get(s).size()));
+            sum += (area.get(s).size() * (lrEdges.get(s).size() + tbEdges.get(s).size()));
         }
 
         final long p1Time = System.currentTimeMillis();
+        
         System.out.println("Part 1: " + sum);
         System.out.println((p1Time - startTime) + "ms");
-
     }
 
     public static int fill(int x, int y, char id, String head) {
 
-        gardenVisited[x][y] = '0';
-        area.putIfAbsent(head, 0);
-        area.put(head, (area.get(head) + 1));
-
         String xy = int2str(x, y);
         String yPlus = int2str(x, y + 1);
         String xPlus = int2str(x + 1, y);
+
+        boolean top = false, bottom = false, left = false, right = false;
+
+        gardenVisited.add(xy);
+        area.putIfAbsent(head, new HashSet<>());
+        area.get(head).add(xy);
 
         lrEdges.putIfAbsent(head, new HashSet<>());
         lrRemoved.putIfAbsent(head, new HashSet<>());
@@ -101,26 +90,12 @@ public class day12 {
             tbEdges.get(head).add(xPlus);
         }
 
-        for (char[] c : garden) {
-            for (char v : c){
-                System.out.print(v);
-            }
-            System.out.println();
-        }
-        System.out.println("Region " + head + " has " + tbEdges.get(head).size() + " tbEdges and " + lrEdges.get(head).size()+ " lrEdges");
-        System.out.println();
         // North / Up
         if (x - 1 > -1) {
             if (garden[x - 1][y] == id) {
                 tbEdges.get(head).remove(xy);
                 tbRemoved.get(head).add(xy);
-                System.out.println("removed " + xy);
-                fill(x - 1 , y, id, head);
-
-                if (gardenVisited[x - 1][y] == id) {
-                    return -1;
-                }
-
+                top = !gardenVisited.contains(int2str((x-1), y));
             }
         }
 
@@ -129,13 +104,7 @@ public class day12 {
             if (garden[x][y + 1] == id) {
                 lrEdges.get(head).remove(yPlus);
                 lrRemoved.get(head).add(yPlus);
-                System.out.println("removed " + yPlus);
-                fill(x, y + 1, id, head);
-
-                if (gardenVisited[x][y + 1] == id) {
-                    return -1;
-                }
-
+                right = !gardenVisited. contains(yPlus);
             }
         }
 
@@ -144,14 +113,7 @@ public class day12 {
             if (garden[x + 1][y] == id) {
                 tbEdges.get(head).remove(xPlus);
                 tbRemoved.get(head).add(xPlus);
-                System.out.println("removed " + xPlus);
-                fill(x + 1, y, id, head);
-
-                if (gardenVisited[x + 1][y] == id) {
-                    return -1;
-                }
-
-
+                bottom = !gardenVisited.contains(xPlus);
             }
         }
 
@@ -160,15 +122,24 @@ public class day12 {
             if (garden[x][y - 1] == id) {
                 lrEdges.get(head).remove(xy);
                 lrRemoved.get(head).add(xy);
-                System.out.println("removed " + xy);
-                fill(x, y - 1, id, head);
-
-                if (gardenVisited[x][y - 1] == id) {
-                    return -1;
-                }
-
-
+                left = !gardenVisited.contains(int2str(x, (y-1)));
             }
+        }
+
+        if (top) {
+            fill(x - 1 , y, id, head);
+        }
+
+        if (bottom) {
+            fill(x + 1 , y, id, head);
+        }
+
+        if (right) {
+            fill(x, y + 1, id, head);
+        }
+
+        if (left) {
+            fill(x, y - 1, id, head);
         }
 
         return -1;
