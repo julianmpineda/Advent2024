@@ -2,6 +2,7 @@ import java.io.*;
 import java.util.*;
 
 public class day13 {
+
     public static void main(String[] args) {
 
         final long startTime = System.currentTimeMillis();
@@ -12,14 +13,16 @@ public class day13 {
             Scanner myReader = new Scanner(myObj);
             while (myReader.hasNextLine()) {
                 int[] temp = new int[6];
+
                 for (int f = 0; f < 3; f++) {
                     String line = myReader.nextLine();
                     int comma = line.indexOf(',');
-                    String[] num = new String[2];
+
                     temp[0 + 2*f] = Integer.parseInt(line.substring(0, comma).replaceAll("[^0-9]", ""));
                     temp[1 + 2*f] = Integer.parseInt(line.substring(comma).replaceAll("[^0-9]", ""));
                 }
                 machines.add(temp);
+
                 if (myReader.hasNextLine()) {
                     myReader.nextLine();
                 }
@@ -29,34 +32,67 @@ public class day13 {
             e.printStackTrace();
         }
 
-        int sum = 0;
+        System.out.println("Part 1: " + solve(machines, 1));
+        System.out.println("Part 2: " + solve(machines, 2));
+        final long endTime = System.currentTimeMillis();
+        System.out.println((endTime - startTime) + "ms");
+    }
+
+    private static long solve(List<int[]> machine, int part) {
+
+        long sum = 0L;
+
+        for (int c = 0; c < machine.size(); c++) {
+
+            int aX = machine.get(c)[0], aY = machine.get(c)[1], bX = machine.get(c)[2], bY = machine.get(c)[3];
+            long prizeX = machine.get(c)[4] + ((part - 1) * 10000000000000L), prizeY = machine.get(c)[5]+ ((part - 1) * 10000000000000L);
+            long tokens = 0L;
+
+            long aPress = ((bY * prizeX) - (bX * prizeY)) / ((aX * bY) - (aY * bX));
+            long pBress = ((prizeY * aX) - (prizeX * aY)) / ((aX * bY) - (aY * bX));
+
+            boolean xMatch = ((aX * aPress) + (bX * pBress)) == prizeX;
+            boolean yMatch = ((aY * aPress) + (bY * pBress)) == prizeY;
+
+            if (xMatch && yMatch) {
+                tokens = pBress + (aPress * 3);
+            }
+
+            sum += tokens;
+        }
+
+        return sum;
+    }
+}
+
+/*
+        int sumOne = 0;
 
         for (int j = 0; j < machines.size(); j++) {
             int aX = machines.get(j)[0], aY = machines.get(j)[1], bX = machines.get(j)[2], bY = machines.get(j)[3];
-            int prizeX = machines.get(j)[4], prizeY = machines.get(j)[5], tokens = Integer.MAX_VALUE;
-            boolean found = false;
+            int prizeX = machines.get(j)[4], prizeY = machines.get(j)[5];
+            int tokens = 0;
 
             for (int i = 0; i < 100; i++) {
-                boolean xMatch = (prizeX - (aX * i)) % bX == 0;
-                boolean yMatch = (prizeY - (aY * i)) % bY == 0;
+
+                boolean xMatch, yMatch;
+
+                xMatch = (prizeX - (aX * i)) % bX == 0;
+                yMatch = (prizeY - (aY * i)) % bY == 0;
 
                 if (xMatch && yMatch) {
                     int bXum = (prizeX - (aX * i)) / bX;
                     int bYum = (prizeY - (aY * i)) / bY;
 
                     if (bXum == bYum) {
-                        found = true;
-                        tokens = Math.min(tokens, (bXum + (3 * i)));
+                        tokens = bXum + (3 * i);
+                        break;
                     }
                 }
             }
-            sum += found ? tokens : 0;
+
+            sumOne += tokens;
         }
 
-        final long p1Time = System.currentTimeMillis();
-        System.out.println("Part 1: " + sum);
-        System.out.println((p1Time - startTime) + "ms");
-    }
-
-}
+ */
 
