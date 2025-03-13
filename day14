@@ -1,0 +1,55 @@
+import java.util.*;
+import java.io.*;
+
+public class day14 {
+    public static void main(String[] args) {
+
+        final long startTime = System.currentTimeMillis();
+        List<String> file = new ArrayList<>();
+
+        try {
+            File myObj = new File("src/data/data14.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                file.add(myReader.nextLine());
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        int[] quad = new int[4];
+
+        for (int i = 0; i < file.size(); i++) {
+            //splits into a size 8 array, will just code out the unneeded cells.
+            String[] sTemp = file.get(i).split("[^0-9|-]");
+            int[] temp = new int[4];
+
+            temp[0] = Integer.parseInt(sTemp[2]);
+            temp[1] = Integer.parseInt(sTemp[3]);
+            temp[2] = Integer.parseInt(sTemp[6]);
+            temp[3] = Integer.parseInt(sTemp[7]);
+
+            int[] point = new int[2];
+
+            point[0] = ((temp[0] + (temp[2] * 100)) % 101 + 101) % 101;
+            point[1] = ((temp[1] + (temp[3] * 100)) % 103 + 103) % 103;
+
+            if (point[0] < 50 && point[1] < 51) {
+                quad[0]++;
+            } else if (point[0] < 50 && point[1] > 51) {
+                quad[1]++;
+            } else if (point[0] > 50 && point[1] < 51) {
+                quad[2]++;
+            } else if (point[0] > 50 && point[1] > 51) {
+                quad[3]++;
+            }
+        }
+
+        long safetyFactor = quad[0] * quad[1] * quad[2] * quad[3];
+
+        final long p1Time = System.currentTimeMillis();
+        System.out.println("Part 1: " + safetyFactor);
+        System.out.println((p1Time - startTime) + "ms");
+    }
+}
