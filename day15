@@ -1,0 +1,148 @@
+import java.io.*;
+import java.util.*;
+public class day15 {
+
+    private static char[][] map;
+    private static int mapWidth, mapHeight;
+    private static Set<String> walls = new HashSet<>();
+    private static Set<String> boxes = new HashSet<>();
+    private static int[] pos = new int[2];
+    private static final String dirStr = "^>v<";
+    // direction = {^, >, v, <};
+    private static int[][] move = new int[][]{{-1,0}, {0,1}, {1,0}, {0,-1}};
+
+    public static void main(String[] args) {
+        List<String> file = new ArrayList<>();
+
+        try {
+            File myObj = new File("src/data/data15.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                file.add(myReader.nextLine());
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        mapHeight = file.size();
+        mapWidth = file.get(0).length();
+        int row = 0;
+
+        while (!file.get(row).equals("")) {
+
+            if (file.get(row + 1).equals("")) {
+                break;
+            }
+
+            char[] line = file.get(row).toCharArray();
+
+            for (int col = 1; col < line.length; col++) {
+                switch (line[col]) {
+                    case 'O':
+                        boxes.add(int2str(row, col));
+                        break;
+                    case '#':
+                        walls.add(int2str(row, col));
+                        break;
+                    case '@':
+                        pos[0] = row;
+                        pos[1] = col;
+                        break;
+                }
+            }
+
+            row++;
+        }
+
+        // Convert robots path to string of ints
+        String path = file.get(file.size() - 1);
+
+        for (char c : path.toCharArray()) {
+            int dir = dirStr.indexOf(c);
+
+            int spaces = push(pos, dir);
+
+            pos[0] += (spaces * move[dir][0]);
+            pos[1] += (spaces * move[dir][1]);
+        }
+
+        printMap();
+    }
+
+    public static String int2str(int x, int y) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(x);
+        sb.append(',');
+        sb.append(y);
+        return sb.toString();
+    }
+
+    public static int[] str2int(String s) {
+
+        String[] sSplit = s.split(",");
+        int x = Integer.parseInt(sSplit[0]);
+        int y = Integer.parseInt(sSplit[1]);
+
+        return new int[]{y, x};
+    }
+
+    public static int push(int[] pos, int dir) {
+
+        // returns 0 if not moved, returns 1 if moved.
+
+        int newR = pos[0] + move[dir][0];
+        int newC = pos[1] + move[dir][1];
+        String next = int2str(newR, newC);
+
+        if (walls.contains(next)) {
+            return 0;
+        } else if (boxes.contains(next)) {
+            int push = push(new int[]{newR, newC}, dir);
+            if (push == 1) {
+                boxes.remove(int2str(pos[0], pos[1]));
+                boxes.add(next);
+                return 1;
+            } else {
+                return 0;
+            }
+        } else {
+            boxes.remove(int2str(pos[0], pos[1]));
+            boxes.add(next);
+            return 1;
+        }
+    }
+
+    public static void printMap() {
+
+        map = new char[mapHeight][mapWidth];
+
+        for (char[] c : map) {
+            Arrays.fill(c, '.');
+            c[0] = '#';
+            c[mapWidth - 1] = '#';
+        }
+
+        Arrays.fill(map[0], '#');
+        Arrays.fill(map[mapHeight - 1], '#');
+        map[pos[0]][pos[1]] = '@';
+
+        for (String w : walls) {
+            int[] wCoor = str2int(w);
+            map[wCoor[0]][wCoor[1]] = '#';
+        }
+
+        for (String b : boxes) {
+            int[] bCoor = str2int(b);
+            map[bCoor[0]][bCoor[1]] = 'O';
+        }
+
+        for (char[] r : map) {
+            for (char c : r) {
+                System.out.print(c);
+            }
+            System.out.println();
+        }
+
+    }
+}
