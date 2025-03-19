@@ -1,15 +1,14 @@
 import java.io.*;
 import java.util.*;
+
 public class day15 {
 
-    private static char[][] map;
-    private static int mapWidth, mapHeight;
+    // moveStr matches move for indexing.
+    private static final String moveStr = "^>v<";
+    private static int[][] move = new int[][]{{-1,0}, {0,1}, {1,0}, {0,-1}};
     private static Set<String> walls = new HashSet<>();
     private static Set<String> boxes = new HashSet<>();
     private static int[] pos = new int[2];
-    private static final String dirStr = "^>v<";
-    // direction = {^, >, v, <};
-    private static int[][] move = new int[][]{{-1,0}, {0,1}, {1,0}, {0,-1}};
 
     public static void main(String[] args) {
         List<String> file = new ArrayList<>();
@@ -25,19 +24,13 @@ public class day15 {
             e.printStackTrace();
         }
 
-        mapHeight = file.size();
-        mapWidth = file.get(0).length();
+        final long startTime = System.currentTimeMillis();
         int row = 0;
 
         while (!file.get(row).equals("")) {
-
-            if (file.get(row + 1).equals("")) {
-                break;
-            }
-
             char[] line = file.get(row).toCharArray();
 
-            for (int col = 1; col < line.length; col++) {
+            for (int col = 0; col < line.length; col++) {
                 switch (line[col]) {
                     case 'O':
                         boxes.add(int2str(row, col));
@@ -51,7 +44,6 @@ public class day15 {
                         break;
                 }
             }
-
             row++;
         }
 
@@ -60,89 +52,87 @@ public class day15 {
 
         for (char c : path.toCharArray()) {
             int dir = dirStr.indexOf(c);
+            int space = 1;
+            int nextR = pos[0] + move[dir][0];
+            int nextC = pos[1] + move[dir][1];
 
-            int spaces = push(pos, dir);
+            if (walls.contains(int2str(nextR, nextC))) {
+                space = 0;
+            } else if (boxes.contains(int2str(nextR, nextC))) {
+                space = push(pos, dir);
+            }
 
-            pos[0] += (spaces * move[dir][0]);
-            pos[1] += (spaces * move[dir][1]);
+            pos[0] += (space * move[dir][0]);
+            pos[1] += (space * move[dir][1]);
         }
 
-        printMap();
+        long sumGPS = 0L;
+
+        for (String box : boxes) {
+            int[] finalPos = str2int(box);
+            sumGPS += (100 * finalPos[0]) + finalPos[1];
+        }
+
+        final long p1Time = System.currentTimeMillis();
+        System.out.println("Part 1: " + sumGPS);
+        System.out.println(p1Time - startTime + "ms");
     }
 
     public static String int2str(int x, int y) {
         StringBuilder sb = new StringBuilder();
+
         sb.append(x);
         sb.append(',');
         sb.append(y);
+
         return sb.toString();
     }
 
     public static int[] str2int(String s) {
-
         String[] sSplit = s.split(",");
         int x = Integer.parseInt(sSplit[0]);
         int y = Integer.parseInt(sSplit[1]);
 
-        return new int[]{y, x};
+        return new int[]{x, y};
     }
 
+    // Returns if any space was created after boxes moved.
     public static int push(int[] pos, int dir) {
 
-        // returns 0 if not moved, returns 1 if moved.
+        List<int[]> nextBoxes = new ArrayList<>();
+        int newR = pos[0], newC = pos[1], space = 1;
+        
+        while (space == 1) {
+            newR += move[dir][0];
+            newC += move[dir][1];
+            String next = int2str(newR, newC);
 
-        int newR = pos[0] + move[dir][0];
-        int newC = pos[1] + move[dir][1];
-        String next = int2str(newR, newC);
-
-        if (walls.contains(next)) {
-            return 0;
-        } else if (boxes.contains(next)) {
-            int push = push(new int[]{newR, newC}, dir);
-            if (push == 1) {
-                boxes.remove(int2str(pos[0], pos[1]));
-                boxes.add(next);
-                return 1;
+            if (walls.contains(next)) {
+                space = 0;
+                break;
+            } else if (boxes.contains(next)) {
+                nextBoxes.add(str2int(next));
             } else {
-                return 0;
+                space = 2;
+                break;
             }
-        } else {
-            boxes.remove(int2str(pos[0], pos[1]));
-            boxes.add(next);
-            return 1;
-        }
-    }
-
-    public static void printMap() {
-
-        map = new char[mapHeight][mapWidth];
-
-        for (char[] c : map) {
-            Arrays.fill(c, '.');
-            c[0] = '#';
-            c[mapWidth - 1] = '#';
         }
 
-        Arrays.fill(map[0], '#');
-        Arrays.fill(map[mapHeight - 1], '#');
-        map[pos[0]][pos[1]] = '@';
-
-        for (String w : walls) {
-            int[] wCoor = str2int(w);
-            map[wCoor[0]][wCoor[1]] = '#';
+        if (space == 0) {
+            return 0;
         }
 
-        for (String b : boxes) {
-            int[] bCoor = str2int(b);
-            map[bCoor[0]][bCoor[1]] = 'O';
+        for (int b = nextBoxes.size() - 1; b >= 0; b--) {
+            int[] boxPos = nextBoxes.get(b);
+
+            boxes.remove(int2str(boxPos[0], boxPos[1]));
+
+            boxPos[0] += move[dir][0];
+            boxPos[1] += move[dir][1];
+
+            boxes.add(int2str(boxPos[0], boxPos[1]));
         }
 
-        for (char[] r : map) {
-            for (char c : r) {
-                System.out.print(c);
-            }
-            System.out.println();
-        }
-
+        return 1;
     }
 }
