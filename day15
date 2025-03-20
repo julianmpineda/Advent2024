@@ -1,14 +1,19 @@
 import java.io.*;
 import java.util.*;
-
 public class day15 {
 
-    // moveStr matches move for indexing.
-    private static final String moveStr = "^>v<";
-    private static int[][] move = new int[][]{{-1,0}, {0,1}, {1,0}, {0,-1}};
+    private static char[][] map;
+    private static char[][] wideMap;
+    private static int mapWidth, mapHeight;
     private static Set<String> walls = new HashSet<>();
     private static Set<String> boxes = new HashSet<>();
+    private static Set<String> wideWalls = new HashSet<>();
+    private static Set<String> wideBoxes = new HashSet<>();
     private static int[] pos = new int[2];
+    private static int[] widePos = new int[2];
+    private static final String moveStr = "^>v<";
+    // direction = {^, >, v, <};
+    private static int[][] move = new int[][]{{-1,0}, {0,1}, {1,0}, {0,-1}};
 
     public static void main(String[] args) {
         List<String> file = new ArrayList<>();
@@ -28,31 +33,49 @@ public class day15 {
         int row = 0;
 
         while (!file.get(row).equals("")) {
+
             char[] line = file.get(row).toCharArray();
 
             for (int col = 0; col < line.length; col++) {
                 switch (line[col]) {
                     case 'O':
                         boxes.add(int2str(row, col));
+                        wideBoxes.add(int2wide(row, col));
                         break;
                     case '#':
                         walls.add(int2str(row, col));
+                        wideWalls.add(int2wide(row, col));
                         break;
                     case '@':
                         pos[0] = row;
                         pos[1] = col;
+                        widePos[0] = row;
+                        widePos[1] = 2 * col;
                         break;
                 }
             }
+
             row++;
+
         }
+
+        for (String s: wideBoxes) {
+            System.out.println(s);
+        }
+
+        mapHeight = file.size()-2;
+        mapWidth = file.get(0).length();
 
         // Convert robots path to string of ints
         String path = file.get(file.size() - 1);
 
         for (char c : path.toCharArray()) {
-            int dir = dirStr.indexOf(c);
-            int space = 1;
+
+            int dir = moveStr.indexOf(c);
+            int space = 1, wideSpace = 1;
+
+            //Part 1
+
             int nextR = pos[0] + move[dir][0];
             int nextC = pos[1] + move[dir][1];
 
@@ -64,36 +87,71 @@ public class day15 {
 
             pos[0] += (space * move[dir][0]);
             pos[1] += (space * move[dir][1]);
+
+            // Part 2?
+            System.out.println("part 2");
+
+            int wideR = widePos[0] + move[dir][0];
+            int wideC = (widePos[1]/2) + move[dir][1];
+
+            if (wideWalls.contains(int2wide(wideR, wideC))) {
+                wideSpace = 0;
+            } else if (wideBoxes.contains(int2wide(wideR, wideC))) {
+                wideSpace = pushWide(widePos, dir);
+            }
+
+            widePos[0] += (wideSpace * move[dir][0]);
+            widePos[1] += (wideSpace * move[dir][1]);
         }
 
         long sumGPS = 0L;
 
         for (String box : boxes) {
             int[] finalPos = str2int(box);
+
             sumGPS += (100 * finalPos[0]) + finalPos[1];
         }
 
         final long p1Time = System.currentTimeMillis();
         System.out.println("Part 1: " + sumGPS);
         System.out.println(p1Time - startTime + "ms");
+        System.out.println();
+        System.out.println();
+
+        printMap();
+        printWideMap();
     }
 
     public static String int2str(int x, int y) {
         StringBuilder sb = new StringBuilder();
-
         sb.append(x);
         sb.append(',');
         sb.append(y);
+        return sb.toString();
+    }
 
+    public static String int2wide(int x, int y) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(x);
+        sb.append(',');
+        sb.append(2 * y);
+        sb.append(',');
+        sb.append(2 * y + 1);
         return sb.toString();
     }
 
     public static int[] str2int(String s) {
+
         String[] sSplit = s.split(",");
         int x = Integer.parseInt(sSplit[0]);
         int y = Integer.parseInt(sSplit[1]);
 
-        return new int[]{x, y};
+        if (sSplit.length == 3) {
+            int y2 = Integer.parseInt(sSplit[2]);
+            return new int[]{x, y, y2};
+        } else {
+            return new int[]{x, y};
+        }
     }
 
     // Returns if any space was created after boxes moved.
@@ -101,7 +159,7 @@ public class day15 {
 
         List<int[]> nextBoxes = new ArrayList<>();
         int newR = pos[0], newC = pos[1], space = 1;
-        
+
         while (space == 1) {
             newR += move[dir][0];
             newC += move[dir][1];
@@ -109,12 +167,10 @@ public class day15 {
 
             if (walls.contains(next)) {
                 space = 0;
-                break;
             } else if (boxes.contains(next)) {
                 nextBoxes.add(str2int(next));
             } else {
                 space = 2;
-                break;
             }
         }
 
@@ -134,5 +190,114 @@ public class day15 {
         }
 
         return 1;
+    }
+
+    // Returns if any space was created after boxes moved.
+    public static int pushWide(int[] pos, int dir) {
+
+        List<int[]> nextWideBoxes = new ArrayList<>();
+        int newR = pos[0], newC = pos[1]/2, space = 2;
+
+        System.out.println(space == 2);
+        while (space == 2) {
+            newR += move[dir][0];
+            newC += move[dir][1];
+            String next = int2wide(newR, newC);
+            System.out.println(next);
+
+            if (wideWalls.contains(next)) {
+                return 0;
+            } else if (wideBoxes.contains(next)) {
+                nextWideBoxes.add(str2int(next));
+            } else {
+                space = 4;
+            }
+        }
+
+        if (space == 0) {
+            return 0;
+        }
+
+        for (int b = nextWideBoxes.size() - 1; b >= 0; b--) {
+            int[] boxPos = nextWideBoxes.get(b);
+
+            wideBoxes.remove(int2wide(boxPos[0], boxPos[1]/2));
+
+            boxPos[0] += move[dir][0];
+            boxPos[1] = boxPos[1]/2 + move[dir][1];
+
+            wideBoxes.add(int2wide(boxPos[0], boxPos[1]));
+        }
+
+        return 1;
+    }
+
+    private static boolean containsWide(Set<String> list, String b) {
+
+                return false;
+    }
+
+    public static void printMap() {
+
+        map = new char[mapHeight][mapWidth];
+
+        for (char[] c : map) {
+            Arrays.fill(c, '.');
+        }
+
+        map[pos[0]][pos[1]] = '@';
+
+        for (String w : walls) {
+            int[] wCoor = str2int(w);
+            map[wCoor[0]][wCoor[1]] = '#';
+        }
+
+        for (String b : boxes) {
+            int[] bCoor = str2int(b);
+            map[bCoor[0]][bCoor[1]] = 'O';
+        }
+
+        for (char[] r : map) {
+            for (char c : r) {
+                System.out.print(c);
+            }
+            System.out.println();
+        }
+
+        System.out.println();
+    }
+
+    public static void printWideMap() {
+
+        map = new char[mapHeight][2 * mapWidth];
+
+        for (char[] c : map) {
+            Arrays.fill(c, '.');
+        }
+
+        map[widePos[0]][widePos[1]] = '@';
+
+        for (String w : wideWalls) {
+            int[] wCoor = str2int(w);
+            map[wCoor[0]][wCoor[1]] = '#';
+            map[wCoor[0]][wCoor[2]] = '#';
+        }
+
+        for (String b : wideBoxes) {
+            int[] bCoor = str2int(b);
+            map[bCoor[0]][bCoor[1]] = '[';
+            map[bCoor[0]][bCoor[2]] = ']';
+        }
+
+        map[widePos[0]][widePos[1]] = '@';
+
+        for (char[] r : map) {
+            for (char c : r) {
+                System.out.print(c);
+            }
+            System.out.println();
+        }
+
+        System.out.println();
     }
 }
