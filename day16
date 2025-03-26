@@ -1,0 +1,125 @@
+import java.io.*;
+import java.util.*;
+public class day16 {
+
+    private static char[][] map;
+    private static List<String> visited = new ArrayList<>();
+    private static int rowHeight, colHeight;
+    // usual {up/north, right/east, down/south, left/west}
+    private static int[][] move = new int[][]{{- 1, 0}, {0, 1}, {1, 0}, {0 , -1}};
+    private static int[] pos = new int[2];
+    private static int[] end = new int[2];
+
+    public static void main(String[] args) {
+
+        List<String> file = new ArrayList<>();
+
+        try {
+            File myObj = new File("src/data/data16.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                file.add(myReader.nextLine());
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        int count = 0;
+        map = new char[file.size()][file.get(0).length()];
+
+        for (String s : file) {
+            map[count] = s.toCharArray();
+
+            if (s.contains("E")) {
+                end[0] = count;
+                end[1] = s.indexOf("E");
+            }
+
+            if (s.contains("S")) {
+                pos[0] = count;
+                pos[1] = s.indexOf("S");
+            }
+
+            count++;
+        }
+
+        visited.add(int2str(pos[0], pos[1]));
+        int sum = path(pos, 1, 0);
+        System.out.println(sum);
+
+    }
+
+    private static int path(int[] loc, int dir, int score) {
+
+      //  System.out.print("entering " + loc[0] + ", " + loc[1] + " with dir " + dir + " ");
+        int row = loc[0] + move[dir][0];
+        int col = loc[1] + move[dir][1];
+        String step = int2str(row, col);
+
+        if (visited.contains(step)) {
+          //  System.out.println("Already visited");
+            return score;
+        }
+
+        if (map[row][col] == '.') {
+           // System.out.println("step");
+            visited.add(step);
+            score++;
+            score = path(new int[]{row, col}, dir, score);
+        }
+
+        if (map[row][col] == 'E') {
+            System.out.println("end");
+            return score + 1;
+        }
+
+        if (map[row][col] == '#') {
+            //System.out.println(pos[0] + ", "+ pos[1] + " | " + dir + " turn to " + ((dir + 1) % 4) + " | " + row + ", " + col);
+            score += 100;
+
+            int tRight = (dir + 1) % 4;
+            int right = 0;
+            int left = 0;
+
+            if (map[loc[0] + move[tRight][0]][loc[1] + move[tRight][1]] == '#') {
+                right = 1000000;
+            } else {
+                right = path(loc, tRight, score);
+            }
+
+            int tLeft = ((((dir - 1) % 4) + 4) % 4);
+            if (map[loc[0] + move[tLeft][0]][loc[1] + move[tLeft][1]] == '#') {
+                left = 1000000;
+            } else {
+                left = path(loc, tLeft, score);
+            }
+
+            if (right == left) {
+                System.out.println("stuck " + loc[0] + ", " + loc[1]);
+            }
+
+            score = Math.min(right, left);
+        }
+
+        return score;
+    }
+
+    public static String int2str(int x, int y) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(x);
+        sb.append(',');
+        sb.append(y);
+        return sb.toString();
+    }
+
+    public static int[] str2int(String s) {
+
+        String[] sSplit = s.split(",");
+        int x = Integer.parseInt(sSplit[0]);
+        int y = Integer.parseInt(sSplit[1]);
+
+        return new int[]{x, y};
+
+    }
+}
