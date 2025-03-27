@@ -1,0 +1,144 @@
+import java.io.*;
+import java.util.*;
+
+public class day17 {
+
+    private static int aReg, bReg, cReg;
+
+    public static void main(String[] args) {
+
+        List<String> file = new ArrayList<>();
+
+        try {
+            File myObj = new File("src/data/data17.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                file.add(myReader.nextLine());
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        // read and breakdown file
+        int end = file.get(0).indexOf(":");
+        aReg = Integer.parseInt(file.get(0).substring(end+2));
+        bReg = Integer.parseInt(file.get(1).substring(end+2));
+        cReg = Integer.parseInt(file.get(2).substring(end+2));
+        end = file.get(4).indexOf(":");
+        String[] progStr = file.get(4).substring(end+ 2).split(",");
+        int[] program = new int[progStr.length];
+
+        for (int i = 0; i < program.length; i++) {
+            program[i] = Integer.parseInt(progStr[i]);
+        }
+
+        int cursor = 0;
+        StringBuilder output = new StringBuilder();
+
+        while (cursor < program.length - 1) {
+            int operand = program[cursor + 1];
+
+            switch (program[cursor]) {
+                case 0:
+                    aReg = xdv(operand);
+                    cursor += 2;
+                    break;
+                case 1:
+                    bReg = bx1(operand);
+                    cursor += 2;
+                    break;
+                case 2:
+                    bReg = bst(operand);
+                    cursor += 2;
+                    break;
+                case 3:
+                    if (aReg == 0) {
+                        cursor++;
+                    } else {
+                        cursor = operand;
+                    }
+                    break;
+                case 4:
+                    bReg = bxc();
+                    cursor += 2;
+                    break;
+                case 5:
+                    output.append(out(operand));
+                    output.append(",");
+                    cursor += 2;
+                    break;
+                case 6:
+                    bReg = xdv(operand);
+                    cursor += 2;
+                    break;
+                case 7:
+                    cReg = xdv(operand);
+                    cursor += 2;
+                    break;
+            }
+        }
+
+        output.setLength(output.length() - 1);
+        System.out.println("Part 1: " + output.toString());
+
+    }
+
+    // opCode 0, 6, 7
+    private static int xdv (int op) {
+
+        double den = Math.pow(2, combOp(op));
+        System.out.println(den);
+        System.out.println((int)(combOp(op) / den));
+        return (int)(aReg / den);
+    }
+
+
+    // opCode 1
+    private static int bx1(int op) {
+        return op ^ bReg;
+    }
+
+    // opCode 2
+    private static int bst(int op) {
+        return combOp(op) % 8;
+    }
+
+    // opCode 3
+    private static void jnz() {
+        // Used for legibility when transcribing but left as placeholder in case for Part 2.
+    }
+
+    // opCode 4 - dont need this probably - write anyway for p2?
+    private static int bxc() {
+        return bReg ^ cReg;
+    }
+
+
+    // opCode 5
+    private static int out(int op) {
+        return combOp(op) % 8;
+    }
+
+    // Finds and returns combo operand.
+    private static int combOp(int op) {
+
+        if (op > 0 && op < 4) {
+            return op;
+        }
+
+        switch (op) {
+            case 4:
+                return aReg;
+            case 5:
+                return bReg;
+            case 6:
+                return cReg;
+            case 7:
+                System.out.println("Program Invalid: Combo operand 7 found");
+                return -1;
+        }
+
+        return -1;
+    }
+}
