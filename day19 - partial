@@ -1,0 +1,113 @@
+import java.io.*;
+import java.util.*;
+
+public class day19 {
+
+    public static void main(String[] args) {
+
+        final long startTime = System.currentTimeMillis();
+        List<String> patterns = new ArrayList<>();
+        List<String> towels = new ArrayList<>();
+
+        try {
+            File myObj = new File("src/data/data19.txt");
+            Scanner myReader = new Scanner(myObj);
+            towels = new ArrayList<>(Arrays.asList(myReader.nextLine().split(", ")));
+            myReader.nextLine();
+            while (myReader.hasNextLine()) {
+                patterns.add(myReader.nextLine());
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Collections.sort(towels, Comparator.comparingInt(String::length).reversed());
+
+        // Trim towel list down? - strip away towels that can be made from other "blocks"
+
+        List<Integer> remove = new ArrayList<>();
+
+        for (int i = 0; i < towels.size(); i++) {
+            String test = towels.get(i);
+            int len = test.length();
+            if (test.length() > 1) {
+                //System.out.print(test + " contains ");
+                for (int j = 0; j < towels.size(); j++) {
+                    if (j != i && test.contains(towels.get(j))) {
+                        //System.out.print(towels.get(j) + ", ");
+                        test = test.replace(towels.get(j)," ");
+                        len -= towels.get(j).length();
+                    }
+                }
+                //System.out.println();
+                if (len == 0) {
+                    //System.out.println("removing " + towels.get(i));
+                    remove.add(i);
+                }
+            }
+        }
+
+        for (int r = remove.size() - 1; r >= 0; r--) {
+            int index = remove.get(r);
+            towels.remove(index);
+        }
+
+
+        int sum = 0;
+
+        System.out.println();
+
+        for (String s : patterns) {
+            String test = s;
+            int len = test.length();
+            System.out.println("Testing: \n" + s);
+         //   System.out.println();
+            for (int j = 0; j < towels.size(); j++) {
+                String spaces = "";
+                if (test.contains(towels.get(j))) {
+                    for (int x = 0; x < towels.get(j).length(); x++) {
+                        spaces += "-";
+                    }
+                }
+                while (test.contains(towels.get(j))) {
+                    System.out.println("Removing " + towels.get(j));
+                    test = test.replaceFirst(towels.get(j),spaces);
+                    len -= towels.get(j).length();
+                    System.out.println(test +" " + len);
+                }
+
+                if (len <= 0) {
+                    break;
+                }
+            }
+            if (len == 0) {
+                //System.out.println(" possible");
+                sum++;
+            } else {
+              //  System.out.println(" impossible");
+            }
+        }
+
+        System.out.println(sum);
+
+        // end trim
+
+        // for debug printing after removal
+/*
+        System.out.println();
+        for (String s : towels) {
+            System.out.print(s + " ");
+        }
+        System.out.println();
+
+        for (int i : remove) {
+            System.out.print(i + " ");
+        }
+        System.out.println();
+
+
+ */
+        //end print
+    }
+}
