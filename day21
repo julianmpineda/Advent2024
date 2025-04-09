@@ -1,0 +1,47 @@
+import java.io.*;
+import java.util.*;
+
+public class day21 {
+    public static void main(String[] args) {
+
+        List<Long> file = new ArrayList<>();
+
+        try {
+            File myObj = new File("src/data/data21.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                file.add(Long.parseLong(myReader.nextLine()));
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        final long p1StartTime = System.currentTimeMillis();
+        long sum = 0L;
+
+        for (Long secret : file) {
+            for (int j = 0; j < 2000; j++) {
+
+                long temp = secret * 64;
+                secret ^= temp;
+                secret %= 16777216;
+
+                temp = Math.floorDiv(secret, 32);
+                secret ^= temp;
+                secret %= 16777216;
+
+                temp = secret * 2048;
+                secret ^= temp;
+                secret %= 16777216;
+
+            }
+
+            sum += secret;
+        }
+
+        final long p1EndTime = System.currentTimeMillis();
+        System.out.println("Part 1: " + sum);
+        System.out.println((p1EndTime-p1StartTime) + "ms");
+    }
+}
