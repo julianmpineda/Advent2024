@@ -1,0 +1,74 @@
+import java.io.*;
+import java.util.*;
+
+public class day21 {
+    public static void main(String[] args) {
+
+        List<Long> buyers = new ArrayList<>();
+
+        try {
+            File myObj = new File("src/data/data21.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                buyers.add(Long.parseLong(myReader.nextLine()));
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        final long startTime = System.currentTimeMillis();
+        Map<String, Long> sequences = new HashMap<>();
+        long sum = 0L, max = Long.MIN_VALUE;
+
+        for (long secret : buyers) {
+
+            Set<String> sold = new HashSet<>();
+            int last = (int) secret % 10;
+            StringBuilder changes = new StringBuilder("........");
+
+            for (int j = 1; j < 2000; j++) {
+
+                long temp = secret * 64;
+                secret ^= temp;
+                secret %= 16777216;
+
+                temp = Math.floorDiv(secret, 32);
+                secret ^= temp;
+                secret %= 16777216;
+
+                temp = secret * 2048;
+                secret ^= temp;
+                secret %= 16777216;
+
+                int price = (int) secret % 10;
+
+                changes.append((char)((price - last) + '0'));
+                changes.append(",");
+                changes.delete(0, 2);
+
+                String sequence = changes.toString();
+                last = price;
+
+                sequences.putIfAbsent(sequence, 0L);
+
+                if (sold.contains(sequence)) {
+                    continue;
+                }
+
+                long total = sequences.get(sequence) + price;
+
+                sequences.put(sequence, total);
+                max = Math.max(total, max);
+                sold.add(sequence);
+            }
+
+            sum += secret;
+        }
+
+        final long endTime = System.currentTimeMillis();
+        System.out.println("Part 1: " + sum);
+        System.out.println("Part 2: " + max);
+        System.out.println((endTime-startTime) + "ms");
+    }
+}
