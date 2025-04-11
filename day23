@@ -1,0 +1,54 @@
+import java.io.*;
+import java.util.*;
+
+public class day23 {
+    public static void main(String[] args) {
+
+        final long startTime = System.currentTimeMillis();
+        Map<String, List<String>> pcEdgeList = new HashMap<>();
+
+        try {
+            File myObj = new File("src/data/data23.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                String[] temp = myReader.nextLine().split("-");
+
+                pcEdgeList.putIfAbsent(temp[0], new ArrayList<>());
+                pcEdgeList.putIfAbsent(temp[1], new ArrayList<>());
+
+                pcEdgeList.get(temp[0]).add(temp[1]);
+                pcEdgeList.get(temp[1]).add(temp[0]);
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Set<Set<String>> trios = new HashSet<>();
+
+        for (String pcOne : pcEdgeList.keySet()){
+            if (pcOne.charAt(0) == 't') {
+                for (int i = 0; i < pcEdgeList.get(pcOne).size(); i++) {
+                    String pcTwo = pcEdgeList.get(pcOne).get(i);
+                    
+                    for (int j = i; j < pcEdgeList.get(pcOne).size(); j++) {
+                        String pcThree = pcEdgeList.get(pcOne).get(j);
+                        
+                        if (pcEdgeList.get(pcTwo).contains(pcThree) && pcEdgeList.get(pcThree).contains(pcTwo)) {
+                            Set<String> temp = new HashSet<>();
+                            
+                            temp.add(pcOne);
+                            temp.add(pcTwo);
+                            temp.add(pcThree);
+                            trios.add(temp);
+                        }
+                    }
+                }
+            }
+        }
+
+        final long endTime = System.currentTimeMillis();
+        System.out.println("Part 1: " + trios.size());
+        System.out.println((endTime - startTime) + "ms");
+    }
+}
