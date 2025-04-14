@@ -26,17 +26,17 @@ public class day23 {
 
         Set<Set<String>> trios = new HashSet<>();
 
-        for (String pcOne : pcEdgeList.keySet()){
+        for (String pcOne : pcEdgeList.keySet()) {
             if (pcOne.charAt(0) == 't') {
                 for (int i = 0; i < pcEdgeList.get(pcOne).size(); i++) {
                     String pcTwo = pcEdgeList.get(pcOne).get(i);
-                    
+
                     for (int j = i; j < pcEdgeList.get(pcOne).size(); j++) {
                         String pcThree = pcEdgeList.get(pcOne).get(j);
-                        
+
                         if (pcEdgeList.get(pcTwo).contains(pcThree) && pcEdgeList.get(pcThree).contains(pcTwo)) {
                             Set<String> temp = new HashSet<>();
-                            
+
                             temp.add(pcOne);
                             temp.add(pcTwo);
                             temp.add(pcThree);
@@ -50,5 +50,98 @@ public class day23 {
         final long endTime = System.currentTimeMillis();
         System.out.println("Part 1: " + trios.size());
         System.out.println((endTime - startTime) + "ms");
+
+        /* Print pcEdgeList
+
+        System.out.println();
+        for (String s : pcEdgeList.keySet()) {
+            System.out.print(s + ": ");
+            for (String k : pcEdgeList.get(s)) {
+                System.out.print(k + ", ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+
+
+         */
+
+
+        int edgeCount = pcEdgeList.size();
+        List<String> edgeIndex = new ArrayList<>();
+
+        for (String edge : pcEdgeList.keySet()) {
+            edgeIndex.add(edge);
+        }
+
+        int[][] edgeMatrix = new int[edgeCount][edgeCount];
+
+        for (int m = 0; m < edgeCount; m++) {
+            for (int n = 0; n < edgeCount; n++) {
+                if ((m == n) || (pcEdgeList.get(edgeIndex.get(m)).contains(edgeIndex.get(n)))) {
+                    edgeMatrix[m][n] = 1;
+                }
+            }
+        }
+
+        int max = 0;
+        String seq = "";
+
+        for (String pcOne : pcEdgeList.keySet()) {
+
+            if (pcOne.equals("co")) {
+                System.out.println("checking " + pcOne + " ");
+            }
+            int oneInd = edgeIndex.indexOf(pcOne);
+            boolean temp = true;
+
+            for (int i = 0; i < pcEdgeList.get(pcOne).size(); i++) {
+                int twoInd = edgeIndex.indexOf(pcEdgeList.get(pcOne).get(i));
+                temp = temp && (edgeMatrix[oneInd][twoInd] == 1);
+
+                if (pcOne.equals("co")) {
+                    System.out.println("Checking " + pcOne + " vs " + pcEdgeList.get(pcOne).get(i) + " = " + (edgeMatrix[oneInd][twoInd] == 1));
+                }
+
+                for (int j = i + 1; j < pcEdgeList.get(pcOne).size(); j++) {
+                    int threeInd = edgeIndex.indexOf(pcEdgeList.get(pcOne).get(j));
+                    if (pcOne.equals("co")) {
+                        System.out.println("Checking " + pcEdgeList.get(pcOne).get(i) + " vs " + pcEdgeList.get(pcOne).get(j) + " = " + (edgeMatrix[twoInd][threeInd] == 1));
+                    }
+                        temp = temp && (edgeMatrix[twoInd][threeInd] == 1);
+                }
+            }
+
+            if (pcOne.equals("co")) {
+                System.out.println(pcOne + " " + temp);
+                System.out.println("   " + (pcEdgeList.get(pcOne).size()));
+            }
+
+            if (temp) {
+                if (pcEdgeList.get(pcOne).size() > max) {
+                    seq = pcOne;
+                    max = pcEdgeList.get(pcOne).size();
+                    //System.out.println("found");
+                }
+            }
+        }
+
+        // print edge matrix
+
+/*
+        for (String l : edgeIndex) {
+            System.out.print(l + "  ");
+        }
+        System.out.println();
+        for (int[] row : edgeMatrix) {
+            for (int col : row) {
+                System.out.print(col + " | ");
+            }
+            System.out.println();
+        }
+
+*/
+        System.out.println(seq);
+
     }
 }
