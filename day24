@@ -1,0 +1,87 @@
+import java.io.*;
+import java.util.*;
+
+public class day24 {
+    public static void main(String[] args) {
+
+        final long startTime = System.currentTimeMillis();
+        Map<String, Integer> wires = new HashMap<>();
+        Map<String, String> gateList = new HashMap<>();
+        List<String> gateOrder = new ArrayList<>();
+
+        try {
+            File myObj = new File("src/data/data24.txt");
+            Scanner myReader = new Scanner(myObj);
+            boolean preSplit = true;
+            while (myReader.hasNextLine()) {
+
+                String line = myReader.nextLine();
+
+                if (line.equals("")) {
+                    preSplit = false;
+                    continue;
+                }
+
+                if (preSplit) {
+                    String[] temp = line.split(": ");
+                    wires.put(temp[0], Integer.parseInt(temp[1]));
+                } else {
+                    String[] temp = line.split(" -> ");
+                    gateOrder.add(temp[1]);
+                    gateList.put(temp[1], temp[0]);
+                }
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        //Print out both maps
+        /*
+        for (String s : wires.keySet()) {
+            System.out.println(s + ": " + wires.get(s));
+        }
+        System.out.println();
+        for (String s : gateList.keySet()) {
+            System.out.println(gateList.get(s) + " -> " + s);
+        }
+
+         */
+
+        for (String gate : gateOrder) {
+
+            String[] eq = gateList.get(gate).split(" ");
+            System.out.println(eq[0] + "|" + eq[1] + "|" + eq[2]);
+
+            int one = wires.get(eq[0]);
+            int two = wires.get(eq[2]);
+            int ans = 0;
+            String op = eq[1];
+
+            if (op.equals("AND")) {
+                ans = one & two;
+            } else if (op.equals("OR")) {
+                ans = one | two;
+            } else if (op.equals("XOR")) {
+                ans = one ^ two;
+            }
+
+            wires.put(gate, ans);
+        }
+
+        int count = 0;
+        int result = 0;
+        String zGate = "z00";
+
+        while(wires.keySet().contains(zGate)) {
+
+            result += (wires.get(zGate) * (Math.pow(2, count)));
+            count++;
+            zGate = "z0" + count;
+
+        }
+
+        System.out.println("Part 1: " + result);
+
+    }
+}
