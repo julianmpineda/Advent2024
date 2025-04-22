@@ -1,0 +1,70 @@
+import java.io.*;
+import java.util.*;
+
+public class day25 {
+    private static List<String> file = new ArrayList<>();
+
+    public static void main(String[] args) {
+
+        final long startTime = System.currentTimeMillis();
+
+        try {
+            File myObj = new File("src/data/data25.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                file.add(myReader.nextLine());
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        List<int[]> locks = new ArrayList<>();
+        List<int[]> keys = new ArrayList<>();
+
+        for (int i = 0; i < file.size(); i++) {
+            if (file.get(i).equals("#####")) {
+                locks.add(decode(i));
+            } else if (file.get(i).equals(".....")) {
+                keys.add(decode(i));
+            }
+            i += 7;
+        }
+
+        int combos = 0;
+
+        for (int[] l : locks) {
+            for (int[] k : keys) {
+                boolean fit = true;
+                for (int m = 0; m < 5; m++) {
+                    int pin = l[m] + k[m];
+                    if (pin > 5) {
+                        fit = false;
+                        break;
+                    }
+                }
+                combos += fit ? 1 : 0;
+            }
+        }
+
+        final long endTime = System.currentTimeMillis();
+        System.out.println("Part 1: " + combos);
+        System.out.println((endTime - startTime) + "ms");
+    }
+
+    private static int[] decode(int start) {
+
+        int h0 = 0, h1 = 0, h2 = 0, h3 = 0, h4 = 0;
+
+        for (int i = 1; i < 6; i++) {
+            String row = file.get(start + i);
+            h0 += (row.charAt(0) == '#') ? 1 : 0;
+            h1 += (row.charAt(1) == '#') ? 1 : 0;
+            h2 += (row.charAt(2) == '#') ? 1 : 0;
+            h3 += (row.charAt(3) == '#') ? 1 : 0;
+            h4 += (row.charAt(4) == '#') ? 1 : 0;
+        }
+
+        return new int[]{h0, h1, h2, h3, h4};
+    }
+}
